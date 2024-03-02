@@ -1,4 +1,6 @@
-$fn= $preview ? 32 : 64;  // render more accurately than preview
+$fn= $preview ? 16 : 64;  // render more accurately than preview
+FINAL = false;            // Don't render everything!
+
 switchHoleSide = 14.5;    // size of square hole in mm
 switchClipSide = 13.8;    // size of square hole in mm
 switchClipDepth = 1.3;    // thickness of clips on switches
@@ -255,67 +257,75 @@ module thumbCluster(side) {
 
             // Add holes for solder bumps
             // Keys
-            for (location = keys) {
-                translate([(location.x - PCBOrigin.x), PCBOrigin.y - location.y, block.z])
-                    rotate([0, 0, location[2]])
-                    keySolderBumps();
+            if (FINAL) {
+                for (location = keys) {
+                    translate([(location.x - PCBOrigin.x), PCBOrigin.y - location.y, block.z])
+                        rotate([0, 0, location[2]])
+                        keySolderBumps();
+                }
             }
             // Diodes
-            for (location = diodes) {
-                translate([(location.x - PCBOrigin.x), PCBOrigin.y - location.y, block.z])
-                    rotate([0, 0, location[2]])
-                    diodeSolderBumps();
+            if (FINAL) {
+                for (location = diodes) {
+                    translate([(location.x - PCBOrigin.x), PCBOrigin.y - location.y, block.z])
+                        rotate([0, 0, location[2]])
+                        diodeSolderBumps();
+                }
             }
             // Screw holes
-            for (location = screws) {
-                translate([(location.x - PCBOrigin.x), PCBOrigin.y - location.y, block.z/2])
-                    rotate([0, 0, location[2]])
-                    screwHole();
+            if (FINAL) {
+                for (location = screws) {
+                    translate([(location.x - PCBOrigin.x), PCBOrigin.y - location.y, block.z/2])
+                        rotate([0, 0, location[2]])
+                        screwHole();
+                }
             }
             // Terminal holes
-            translate([127.9 - PCBOrigin.x, PCBOrigin.y - 136.36 - 1.27 * side, block.z - 9])
-                cube([6, 6, 20], center=true);
+            if (FINAL) {
+                translate([127.9 - PCBOrigin.x, PCBOrigin.y - 136.36 - 1.27 * side, block.z - 9])
+                    cube([6, 6, 20], center=true);
+            }
 
             // Cut out locations of other surface components
             // switch
-            translate([145.1 - PCBOrigin.x, PCBOrigin.y - 80.0, block.z])
-                rotate([0, 0, 170])
+            if (FINAL) {
+                translate([145.1 - PCBOrigin.x, PCBOrigin.y - 80.0, block.z])
+                    rotate([0, 0, 170])
                     cube([11, 5, 2.5], center=true);
-            // reset button
-            if (side == -1) {  // On left side, cut out reset button entirely
-                translate([171.3 - PCBOrigin.x, PCBOrigin.y - 103.5, block.z])
-                    rotate([0, 0, -25])
+                // reset button
+                if (side == -1) {  // On left side, cut out reset button entirely
+                    translate([171.3 - PCBOrigin.x, PCBOrigin.y - 103.5, block.z])
+                        rotate([0, 0, -25])
                         translate([2, 0, -1])
                         cube([13.7, 10.6, 5], center=true);
-            }
-            if (side == 1) {   // On right side, leave gap for solder bumps
-                translate([171.3 - PCBOrigin.x, PCBOrigin.y - 103.5, block.z])
-                    rotate([0, 0, -25])
-                        cube([8.6, 6.6, 2.5], center=true);
-            }
-            // ethernet jack
-            translate([84 - PCBOrigin.x, PCBOrigin.y - 159.4, block.z-1.5])
-                cube([15, 26.5, 3]);
-            translate([64 - PCBOrigin.x, PCBOrigin.y - 153.80, block.z-1.5])
-                cube([20.1, 14.88, 3]); // cut-out for plug
-
-            // cut off far right side for rubber feet/clip
-            translate([block.x, block.y/2, block.z - 15]) {
-                rotate([0, 0, -25]) {
-                    translate([3, -40, 0])
-                        cube([15, 50, 30]);
-                    translate([-9.75, -5, 0])
-                        cube([15, 50, 30]);
-                    translate([-19, 12, 0])
-                        cube([15, 50, 30]);
-                    translate([-17, -5, 0])
-                        cube([10, 7, 30]);
                 }
-                translate([-14.5, -1, 0])
-                    cube([19, 10, 30]);
+                if (side == 1) {   // On right side, leave gap for solder bumps
+                    translate([171.3 - PCBOrigin.x, PCBOrigin.y - 103.5, block.z])
+                        rotate([0, 0, -25])
+                        cube([8.6, 6.6, 2.5], center=true);
+                }
+                // ethernet jack
+                translate([84 - PCBOrigin.x, PCBOrigin.y - 159.4, block.z-1.5])
+                    cube([15, 26.5, 3]);
+                translate([64 - PCBOrigin.x, PCBOrigin.y - 153.80, block.z-1.5])
+                    cube([20.1, 14.88, 3]); // cut-out for plug
             }
-            /* translate([block.x -12, block.y/2 + 19, block.z - 15]) */
-            /*         cube([15, 50, 3]); */
+
+            /* // cut off far right side for rubber feet/clip */
+            /* translate([block.x, block.y/2, block.z - 15]) { */
+            /*     rotate([0, 0, -25]) { */
+            /*         translate([3, -40, 0]) */
+            /*             cube([15, 50, 30]); */
+            /*         translate([-9.75, -5, 0]) */
+            /*             cube([15, 50, 30]); */
+            /*         translate([-19, 12, 0]) */
+            /*             cube([15, 50, 30]); */
+            /*         translate([-17, -5, 0]) */
+            /*             cube([10, 7, 30]); */
+            /*     } */
+            /*     translate([-14.5, -1, 0]) */
+            /*         cube([19, 10, 30]); */
+            /* } */
 
             // Cut all other curves
 
@@ -324,7 +334,7 @@ module thumbCluster(side) {
                 translate([2.5, PCBOrigin.y - PCBTopEdge - 2.5, block.z/2])
                     cube([5.01, 5.01, block.z+1], center=true);
                 translate([5, PCBOrigin.y - PCBTopEdge - 5, block.z/2])
-                rotate([0, 0, 90])
+                    rotate([0, 0, 90])
                     cylinder(h=block.z+2, r=5, center=true);
             }
 
@@ -333,7 +343,7 @@ module thumbCluster(side) {
                 cube([116.58 - PCBOrigin.x, 25, block.z+1], center=false);
             translate([116.58 - PCBOrigin.x, PCBOrigin.y - PCBTopEdge + 5, block.z/2])
                 rotate([0, 0, 90])
-                    cylinder(h=block.z+2, r=5, center=true);
+                cylinder(h=block.z+2, r=5, center=true);
 
             // Transition to top arc
             difference() {
@@ -341,31 +351,31 @@ module thumbCluster(side) {
                     cube([5.1, 4.1, block.z+1], center=false);
                 translate([125.90 - PCBOrigin.x, PCBOrigin.y - 77.00, block.z/2])
                     rotate([0, 0, 90])
-                        cylinder(h=block.z+2, r=5, center=true);
+                    cylinder(h=block.z+2, r=5, center=true);
             }
 
 
             // Bottom left corner
             translate([0, thumbDisplacement, 0])
-            rotate(switchAngle)
-            difference() {
-                translate([1, 1-sin(switchAngle.z), block.z/2])
-                    cube([2.01, 2.01, block.z+1], center=true);
-                translate([1.95, 2.05 - 2*sin(switchAngle.z), block.z/2])
-                rotate([0, 0, 90])
-                    cylinder(h=block.z+2, r=2, center=true);
-            }
+                rotate(switchAngle)
+                difference() {
+                    translate([1, 1-sin(switchAngle.z), block.z/2])
+                        cube([2.01, 2.01, block.z+1], center=true);
+                    translate([1.95, 2.05 - 2*sin(switchAngle.z), block.z/2])
+                        rotate([0, 0, 90])
+                        cylinder(h=block.z+2, r=2, center=true);
+                }
 
             // Top corner of thumb
             translate([0, -thumbDisplacement*1+1, 0])
-            rotate(switchAngle)
-            difference() {
-                translate([-sin(switchAngle.z)*keyWidth+1, -sin(switchAngle.z)*thumbDisplacement-2.93, block.z/2])
-                    cube([2.01, 2.01, block.z+1], center=true);
-                translate([-sin(switchAngle.z)*keyWidth+2, -sin(switchAngle.z)*thumbDisplacement-4, block.z/2])
-                rotate([0, 0, 90])
-                    cylinder(h=block.z+2, r=2, center=true);
-            }
+                rotate(switchAngle)
+                difference() {
+                    translate([-sin(switchAngle.z)*keyWidth+1, -sin(switchAngle.z)*thumbDisplacement-2.93, block.z/2])
+                        cube([2.01, 2.01, block.z+1], center=true);
+                    translate([-sin(switchAngle.z)*keyWidth+2, -sin(switchAngle.z)*thumbDisplacement-4, block.z/2])
+                        rotate([0, 0, 90])
+                        cylinder(h=block.z+2, r=2, center=true);
+                }
 
             // Top right arc
             // r=89.27 x=126.72 y=161.34
@@ -375,13 +385,13 @@ module thumbCluster(side) {
                     cube([55, 28, block.z+1], center=false);
                 translate([126.72 - PCBOrigin.x, PCBOrigin.y - 161.34, block.z/2])
                     rotate([0, 0, 90])
-                        cylinder(h=block.z+2, r=89.27, center=true);
+                    cylinder(h=block.z+2, r=89.27, center=true);
             }
 
             // Bottom arc
             translate([141.1 - PCBOrigin.x, PCBOrigin.y - 203.9, block.z/2])
                 rotate([0, 0, 90])
-                    cylinder(h=block.z+2, r=59.78, center=true);
+                cylinder(h=block.z+2, r=59.78, center=true);
 
             // Smoothing transition to top right edge
             difference() {
@@ -389,7 +399,7 @@ module thumbCluster(side) {
                     cube([5, 5, block.z+1], center=false);
                 translate([176.03 - PCBOrigin.x, PCBOrigin.y - 93.02, block.z/2])
                     rotate([0, 0, 90])
-                        cylinder(h=block.z+2, r=5, center=true);
+                    cylinder(h=block.z+2, r=5, center=true);
             }
 
             // Transition to bottom arc on left
@@ -398,7 +408,7 @@ module thumbCluster(side) {
                     cube([5.2, 0.9, block.z+1], center=false);
                 translate([100.04 - PCBOrigin.x, PCBOrigin.y - 156.96, block.z/2])
                     rotate([0, 0, 90])
-                        cylinder(h=block.z+2, r=2.86, center=true);
+                    cylinder(h=block.z+2, r=2.86, center=true);
             }
 
             // Bottom right flat part
@@ -411,7 +421,7 @@ module thumbCluster(side) {
                     cube([5.2, 1.0, block.z+1], center=false);
                 translate([168.08 - PCBOrigin.x, PCBOrigin.y - 145.11, block.z/2])
                     rotate([0, 0, 90])
-                        cylinder(h=block.z+2, r=5.1, center=true);
+                    cylinder(h=block.z+2, r=5.1, center=true);
             }
 
             // Bottom right corner
@@ -420,28 +430,28 @@ module thumbCluster(side) {
                     cube([5.1, 5.1, block.z+1], center=false);
                 translate([100 - 5, PCBOrigin.y - 145.2, block.z/2])
                     rotate([0, 0, 90])
-                        cylinder(h=block.z+2, r=5, center=true);
+                    cylinder(h=block.z+2, r=5, center=true);
             }
 
             if (side==1) {  // right side
-                // cut-out for nicenano: 20 mm wide by 34 long ... but need thin layer for battery plus screws
+                            // cut-out for nicenano: 20 mm wide by 34 long ... but need thin layer for battery plus screws
                 translate([107.65 - PCBOrigin.x, PCBOrigin.y - 111.35 + 2, block.z/2])
                     cube([22, 39, block.z+1], center=true);
                 // screws
                 translate([115.27 - PCBOrigin.x, PCBOrigin.y - 130.42, block.z/2]) {
-                        // screw shaft
-                            cylinder(h=block.z + .1, d=screwDiameter, center=true);
-                        // screw head
-                        translate([0, 0, block.z/2 + 0.5])
-                            cylinder(h=5, d=screwHeadDiameter, center=true);
-                    }
+                    // screw shaft
+                    cylinder(h=block.z + .1, d=screwDiameter, center=true);
+                    // screw head
+                    translate([0, 0, block.z/2 + 0.5])
+                        cylinder(h=5, d=screwHeadDiameter, center=true);
+                }
                 translate([100.03 - PCBOrigin.x, PCBOrigin.y - 130.42, block.z/2]) {
                     // screw shaft
                     cylinder(h=block.z + .1, d=screwDiameter, center=true);
                     // screw head
                     translate([0, 0, block.z/2 + 0.5])
                         cylinder(h=5, d=screwHeadDiameter, center=true);
-                    }
+                }
                 // Cut-out for USB-C plug
                 translate([107.65 - PCBOrigin.x, PCBOrigin.y - PCBTopEdge, block.z])
                     cube([13, 30, 18], center=true);
