@@ -454,7 +454,7 @@ module thumbCluster(side) {
                 }
                 // Cut-out for USB-C plug
                 translate([107.65 - PCBOrigin.x, PCBOrigin.y - PCBTopEdge, block.z])
-                    cube([13, 30, 18], center=true);
+                    cube([13, 30, 23], center=true);
             }
 
         }
