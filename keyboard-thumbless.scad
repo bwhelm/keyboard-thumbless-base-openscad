@@ -1,5 +1,5 @@
 $fn= $preview ? 32 : 64;  // render more accurately than preview
-FINAL = true;            // Don't render everything when false!
+FINAL = true;             // Don't render everything when false!
 
 switchHoleSide = 14.5;    // size of square hole in mm
 switchClipSide = 13.8;    // size of square hole in mm
@@ -25,7 +25,7 @@ nutDiameter = 4.9;        // diameter of nut, point to point
 standoffDiameter = 3.2;   // diameter of standoff  FIXME!
 standoffHeight = 6;       // height of standoff  FIXME!!
 
-bumperDia = 10;           // Diameter of bumpers + 2mm
+bumperDia = 12.1;         // Diameter of bumpers + 2.1mm
 clipSlotLength = 14;      // length of slot in string clip
 clipThickness = 8.0;      // thickness of string clip + 1 mm
 
@@ -121,9 +121,9 @@ module keyhole(side) {
         // holes for pins/wires
         rotate([0, 0, 180]) {
             translate([5.9, 0, 0])
-                cylinder(h=201, r=1.5, center=true);
+                cylinder(h=40, r=1.5, center=true);
             translate([3.8, side * 5, 0])
-                cylinder(h=201, r=1.5, center=true);
+                cylinder(h=40, r=1.5, center=true);
         }
     }
 }
@@ -207,7 +207,7 @@ module thumbCluster(side) {
                     union() {
 
                         // Main block
-                        cube([block.x-4, PCBOrigin.y - PCBTopEdge, block.z]);  // Don't go all the way to end
+                        cube([block.x, PCBOrigin.y - PCBTopEdge, block.z]);  // Don't go all the way to end
                         translate([0, 0, block.z - topThickness])
                             cube([block.x-4, block.y, topThickness]); // Don't go all the way to end
 
@@ -295,23 +295,19 @@ module thumbCluster(side) {
                     // Cut out locations of other surface components
                     if (FINAL) {
                         // switch
-                        translate([145.1 - PCBOrigin.x, PCBOrigin.y - 80.0, block.z])
-                            rotate([0, 0, 170])
-                            cube([11, 5, 2.5], center=true);
-                        // reset button
-                        /* if (side == -1) {  // On left side, cut out reset button entirely */
-                        /*     translate([171.3 - PCBOrigin.x, PCBOrigin.y - 103.5, block.z]) */
-                        /*         rotate([0, 0, -25]) */
-                        /*         translate([2, 0, -1]) */
-                        /*         cube([13.7, 10.6, 5], center=true); */
-                        /* } */
+                        if (side == 1) {   // Switch goes on right side only
+                            translate([145.1 - PCBOrigin.x, PCBOrigin.y - 80.0, block.z])
+                                rotate([0, 0, 170])
+                                cube([11, 5, 2.5], center=true);
+                        }
+                        // reset button FIXME: Position needs to be adjusted!
                         if (side == 1) {   // On right side, leave gap for solder bumps
                             translate([171.3 - PCBOrigin.x, PCBOrigin.y - 103.5, block.z])
                                 rotate([0, 0, -25])
                                 cube([8.6, 6.6, 2.5], center=true);
                         }
-                        // String clip
-                        translate([PCBOrigin.x+1.1, 44, block.z-5]){
+                        // String clip: FIXME: Position needs to be adjusted!
+                        translate([PCBOrigin.x+5.1, 44, block.z-5]){
                             cube([clipSlotLength, clipThickness, 10]);
                         }
                         // ethernet jack
@@ -376,16 +372,16 @@ module thumbCluster(side) {
                                 cylinder(h=block.z+2, r=2, center=true);
                         }
 
-                    // Top corner of thumb
-                    translate([0, -thumbDisplacement*1+1, 0])
-                        rotate(switchAngle)
-                        difference() {
-                            translate([-sin(switchAngle.z)*keyWidth+1, -sin(switchAngle.z)*thumbDisplacement-2.93, block.z/2])
-                                cube([2.01, 2.01, block.z+1], center=true);
-                            translate([-sin(switchAngle.z)*keyWidth+2, -sin(switchAngle.z)*thumbDisplacement-4, block.z/2])
-                                rotate([0, 0, 90])
-                                cylinder(h=block.z+2, r=2, center=true);
-                        }
+                    // // Top corner of thumb
+                    // translate([0, -thumbDisplacement*1+1, 0])
+                    //     rotate(switchAngle)
+                    //     difference() {
+                    //         translate([-sin(switchAngle.z)*keyWidth+1, -sin(switchAngle.z)*thumbDisplacement-2.93, block.z/2])
+                    //             cube([2.01, 2.01, block.z+1], center=true);
+                    //         translate([-sin(switchAngle.z)*keyWidth+2, -sin(switchAngle.z)*thumbDisplacement-4, block.z/2])
+                    //             rotate([0, 0, 90])
+                    //             cylinder(h=block.z+2, r=2, center=true);
+                    //     }
 
                     // Top right arc
                     // r=89.27 x=126.72 y=161.34
@@ -469,31 +465,27 @@ module thumbCluster(side) {
 
                     // Cut out bumpers -- do it here, and then again later
                     // 1. Inside close bumper
-                    translate([bumperDia/2-1, bumperDia/2, 2.31])
-                        rotate([0, -sliceAngle, 0]) cylinder(d=bumperDia-2, h=2, center=true);
+                    rotate([0, -sliceAngle, 0]) translate([bumperDia/2-5, bumperDia/2+5, .69])
+                        cylinder(d=bumperDia-2, h=2, center=true);
                     // 2. Inside far bumper
-                    rotate([0, -sliceAngle, 0]) translate([bumperDia/2+.3, PCBTopEdge-3, 0.7]) cylinder(d=bumperDia-2, h=2, center=true);
+                    rotate([0, -sliceAngle, 0]) translate([bumperDia/2+.3, PCBTopEdge-3, .69])
+                        cylinder(d=bumperDia-2, h=2, center=true);
+                    // 3. Outside close bumper
+                    translate([100-bumperDia/2-.5, bumperDia+4, 35.0])
+                        cylinder(d=bumperDia-2, h=4);
+                    // 4. Outside far bumper
+                    translate([100-bumperDia/2-.5, PCBTopEdge-bumperDia-1, 35.0])
+                        cylinder(d=bumperDia-2, h=4);
 
                 }  // difference
 
-                // BUMPERS FIXME: Should provide a recess into which the bumper fits
+                // BUMPERS
 
-                // 1. Inside close bumper (on thumb switch)
-                translate([bumperDia/2-1, bumperDia/2, 2.31]) {
-                    difference(){
-                        rotate([0, -sliceAngle, 0]) cylinder(d=bumperDia, h=6);
-                        rotate([0, -sliceAngle, 0]) cylinder(d=bumperDia-2, h=2, center=true);
-                        rotate([0, 0, switchAngleZ]) translate([-7, -bumperDia/2+2.8, -2]) {
-                            cube([4.7, bumperDia, bumperDia]);
-                        }
-                    }
-                }
-
-                // 2. Inside far bumper
+                // 2. Inside far bumper: need to build this up
                 difference(){
                     rotate([0, -sliceAngle, 0])
                         translate([bumperDia/2+.3, PCBTopEdge-3, 0.7])
-                        cylinder(d=bumperDia, h=6);
+                        cylinder(d=bumperDia, h=stringHoleThickness);
                     rotate([0, -sliceAngle, 0]) translate([bumperDia/2+.3, PCBTopEdge-3, 0.7]) cylinder(d=bumperDia-2, h=2, center=true);
                     translate([-bumperDia/2, PCBTopEdge-2.4, -0.05]) {
                         cube([bumperDia, bumperDia, bumperDia + .1]);
@@ -502,12 +494,6 @@ module thumbCluster(side) {
                         cube([bumperDia, bumperDia, bumperDia]);
                 }
 
-                // 3. Outside close bumper
-                // FIXME
-
-                // 4. Outside far bumper
-                // FIXME
-
             }  // union
 
         }  // translate
@@ -515,6 +501,6 @@ module thumbCluster(side) {
 }  // thumbCluster module
 
 // right side
-/* thumbCluster("right"); */
+thumbCluster("right");
 // left side
-translate([0,-20,0]) thumbCluster("left");
+// translate([0,-20,0]) thumbCluster("left");
