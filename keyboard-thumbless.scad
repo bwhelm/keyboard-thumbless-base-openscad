@@ -1,5 +1,5 @@
 $fn= $preview ? 32 : 64;  // render more accurately than preview
-FINAL = false;            // Don't render everything!
+FINAL = true;            // Don't render everything when false!
 
 switchHoleSide = 14.5;    // size of square hole in mm
 switchClipSide = 13.8;    // size of square hole in mm
@@ -309,10 +309,10 @@ module thumbCluster(side) {
                                 cube([8.6, 6.6, 2.5], center=true);
                         }
                         // ethernet jack
-                        translate([84 - PCBOrigin.x, PCBOrigin.y - 159.4, block.z-1.5])
-                            cube([15, 26.5, 3]);
-                        translate([64 - PCBOrigin.x, PCBOrigin.y - 153.80, block.z-1.5])
-                            cube([20.1, 14.88, 3]); // cut-out for plug
+                        translate([84 - PCBOrigin.x, PCBOrigin.y - 158.4, block.z-1.5])
+                            cube([15, 25.5, 3]);
+                        /* translate([64 - PCBOrigin.x, PCBOrigin.y - 153.80, block.z-1.5]) */
+                        /*     cube([20.1, 14.88, 3]); // cut-out for plug */
                     }
 
                     /* // cut off far right side for rubber feet/clip */
