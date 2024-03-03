@@ -459,8 +459,12 @@ module thumbCluster(side) {
                                 cylinder(h=5, d=screwHeadDiameter, center=true);
                         }
                         // Cut-out for USB-C plug
-                        translate([107.65 - PCBOrigin.x, PCBOrigin.y - PCBTopEdge, block.z])
-                            cube([13, 30, 23], center=true);
+                        // #translate([107.65 - PCBOrigin.x, PCBOrigin.y - PCBTopEdge, block.z])
+                        //     cube([13, 30, 23], center=true);
+                        translate([107.65 - PCBOrigin.x-6.5,
+                                   PCBOrigin.y - PCBTopEdge - 15,
+                                   block.z - 12.5])
+                            cube([13, 30, 10]);
                     }
 
                     // Cut out bumpers -- do it here, and then again later
