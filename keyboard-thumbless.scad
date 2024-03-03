@@ -26,6 +26,8 @@ standoffDiameter = 3.2;   // diameter of standoff  FIXME!
 standoffHeight = 6;       // height of standoff  FIXME!!
 
 bumperDia = 10;           // Diameter of bumpers + 2mm
+clipSlotLength = 14;      // length of slot in string clip
+clipThickness = 8.0;      // thickness of string clip + 1 mm
 
 keyboardLength = 102;     // length of keyboard to front surface of thumb
 
@@ -241,7 +243,7 @@ module thumbCluster(side) {
                     // Cut out arch behind keys (extruding oval of correct size)
                     translate([block.x + archFudge,
                             block.y/2,
-                            -.35]) // make sure to leave minimum thickness
+                            -1.5]) // make sure to leave minimum thickness
                         rotate([90+archAngle, 90, 0]) // archAngle
                         linear_extrude(height=2*block.y, center=true)
                         resize([2*block.z, 2*(block.x - keyMinDepth)])
@@ -291,22 +293,26 @@ module thumbCluster(side) {
                     }
 
                     // Cut out locations of other surface components
-                    // switch
                     if (FINAL) {
+                        // switch
                         translate([145.1 - PCBOrigin.x, PCBOrigin.y - 80.0, block.z])
                             rotate([0, 0, 170])
                             cube([11, 5, 2.5], center=true);
                         // reset button
-                        if (side == -1) {  // On left side, cut out reset button entirely
-                            translate([171.3 - PCBOrigin.x, PCBOrigin.y - 103.5, block.z])
-                                rotate([0, 0, -25])
-                                translate([2, 0, -1])
-                                cube([13.7, 10.6, 5], center=true);
-                        }
+                        /* if (side == -1) {  // On left side, cut out reset button entirely */
+                        /*     translate([171.3 - PCBOrigin.x, PCBOrigin.y - 103.5, block.z]) */
+                        /*         rotate([0, 0, -25]) */
+                        /*         translate([2, 0, -1]) */
+                        /*         cube([13.7, 10.6, 5], center=true); */
+                        /* } */
                         if (side == 1) {   // On right side, leave gap for solder bumps
                             translate([171.3 - PCBOrigin.x, PCBOrigin.y - 103.5, block.z])
                                 rotate([0, 0, -25])
                                 cube([8.6, 6.6, 2.5], center=true);
+                        }
+                        // String clip
+                        translate([PCBOrigin.x+1.1, 44, block.z-5]){
+                            cube([clipSlotLength, clipThickness, 10]);
                         }
                         // ethernet jack
                         translate([84 - PCBOrigin.x, PCBOrigin.y - 158.4, block.z-1.5])
@@ -509,6 +515,6 @@ module thumbCluster(side) {
 }  // thumbCluster module
 
 // right side
-thumbCluster("right");
+/* thumbCluster("right"); */
 // left side
-/* translate([0,-20,0]) thumbCluster("left"); */
+translate([0,-20,0]) thumbCluster("left");
