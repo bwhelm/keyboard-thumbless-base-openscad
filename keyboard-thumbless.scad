@@ -29,7 +29,7 @@ bumperDia = 12.1;         // Diameter of bumpers + 2.1mm
 clipSlotLength = 14;      // length of slot in string clip
 clipThickness = 8.0;      // thickness of string clip + 1 mm
 
-keyboardLength = 102;     // length of keyboard to front surface of thumb
+keyboardLength = 106;     // length of keyboard to front surface of thumb
 
 stringHoleRadius = 2;     // radius of hole for string
 /* stringHoleThickness = 5;  // thickness of string holder */
@@ -235,10 +235,10 @@ module thumbCluster(side) {
                         keyhole(side);
 
                     // Excess behind key hole
-                    translate([0, thumbDisplacement, 0])
+                    translate([2, thumbDisplacement, 0])
                         rotate(switchAngle)
                         translate([10, 3, 0])
-                        cube([block.x, keyWidth, block.z - topThickness]);
+                        cube([block.x/2, keyWidth, block.z - topThickness]);
 
                     // Cut out arch behind keys (extruding oval of correct size)
                     translate([block.x + archFudge,
@@ -259,7 +259,7 @@ module thumbCluster(side) {
                     translate([0, -.05, -10])
                         rotate([0, -sliceAngle, 0])
                         translate([-10, 0, 0])
-                        cube([block.x + .1, block.y + .1, 10], center=false);
+                        cube([block.x*2 + .1, block.y + .1, 10], center=false);
 
                     // Add holes for solder bumps
                     // Keys
@@ -464,15 +464,15 @@ module thumbCluster(side) {
                         translate([107.65 - PCBOrigin.x-6.5,
                                    PCBOrigin.y - PCBTopEdge - 15,
                                    block.z - 12.5])
-                            cube([13, 30, 10]);
+                            cube([13, 30, 8.5]);
                     }
 
                     // Cut out bumpers -- do it here, and then again later
                     // 1. Inside close bumper
-                    rotate([0, -sliceAngle, 0]) translate([bumperDia/2-5, bumperDia/2+5, .69])
+                    rotate([0, -sliceAngle, 0]) translate([bumperDia/2-5, bumperDia/2+6.5, .69])
                         cylinder(d=bumperDia-2, h=2, center=true);
                     // 2. Inside far bumper
-                    rotate([0, -sliceAngle, 0]) translate([bumperDia/2+.3, PCBTopEdge-3, .69])
+                    rotate([0, -sliceAngle, 0]) translate([bumperDia/2+.3, PCBTopEdge-3.5, .69])
                         cylinder(d=bumperDia-2, h=2, center=true);
                     // 3. Outside close bumper
                     translate([100-bumperDia/2-.5, bumperDia+4, 35.0])
@@ -488,9 +488,9 @@ module thumbCluster(side) {
                 // 2. Inside far bumper: need to build this up
                 difference(){
                     rotate([0, -sliceAngle, 0])
-                        translate([bumperDia/2+.3, PCBTopEdge-3, 0.7])
+                        translate([bumperDia/2+.3, PCBTopEdge-3.5, 0.69])
                         cylinder(d=bumperDia, h=stringHoleThickness);
-                    rotate([0, -sliceAngle, 0]) translate([bumperDia/2+.3, PCBTopEdge-3, 0.7]) cylinder(d=bumperDia-2, h=2, center=true);
+                    rotate([0, -sliceAngle, 0]) translate([bumperDia/2+.3, PCBTopEdge-3.5, 0.69]) cylinder(d=bumperDia-2, h=2, center=true);
                     translate([-bumperDia/2, PCBTopEdge-2.4, -0.05]) {
                         cube([bumperDia, bumperDia, bumperDia + .1]);
                     }
