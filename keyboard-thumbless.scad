@@ -1,4 +1,5 @@
-$fn= $preview ? 32 : 92;  // render more accurately than preview
+$fn= $preview ? 32 : 128; // render more accurately than preview
+segments = $preview ? 32 : 512;  // render some curves more accurately still
 FINAL = true;             // Don't render everything when false!
 
 switchHoleSide = 14.5;    // size of square hole in mm
@@ -6,8 +7,8 @@ switchClipSide = 13.8;    // size of square hole in mm
 switchClipDepth = 1.3;    // thickness of clips on switches
 switchHoleDepth = 2.2;    // depth of switch hole
 switchAngleZ = 25;        // Angle to rotate thum switches on Z axis
-switchAngle = [0, 0, switchAngleZ];         // angle to rotate thumb switches
-thumbDisplacement = -0;  // Amount thumb keys are displaced from bottom of board
+switchAngle = [0, 0, switchAngleZ];  // angle to rotate thumb switches
+thumbDisplacement = -0;   // Amount thumb keys are displaced from bottom of board
 keyHeight = 18;           // space devoted to each key
 keyWidth = 19;
 keyFromTop = 3;           // distance of key from top of block
@@ -247,7 +248,7 @@ module thumbCluster(side) {
                         rotate([90+archAngle, 90, 0]) // archAngle
                         linear_extrude(height=2*block.y, center=true)
                         resize([2*block.z, 2*(block.x - keyMinDepth)])
-                        circle();
+                        circle($fn=segments);
 
                     // Cut out rectangle with keys
                     translate([block.x/2,
@@ -390,13 +391,13 @@ module thumbCluster(side) {
                             cube([55, 28, block.z+1], center=false);
                         translate([126.72 - PCBOrigin.x, PCBOrigin.y - 161.34, block.z/2])
                             rotate([0, 0, 90])
-                            cylinder(h=block.z+2, r=89.27, center=true);
+                            cylinder(h=block.z+2, r=89.27, $fn=segments, center=true);
                     }
 
                     // Bottom arc
                     translate([141.1 - PCBOrigin.x, PCBOrigin.y - 203.9, block.z/2])
                         rotate([0, 0, 90])
-                        cylinder(h=block.z+2, r=59.78, center=true);
+                        cylinder(h=block.z+2, r=59.78, $fn=segments, center=true);
 
                     // Smoothing transition to top right edge
                     difference() {
