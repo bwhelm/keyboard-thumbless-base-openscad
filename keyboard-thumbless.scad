@@ -1,4 +1,4 @@
-$fn= $preview ? 32 : 64;  // render more accurately than preview
+$fn= $preview ? 32 : 92;  // render more accurately than preview
 FINAL = true;             // Don't render everything when false!
 
 switchHoleSide = 14.5;    // size of square hole in mm
@@ -21,7 +21,7 @@ screwLength = 6;          // length of screw shaft
 pcbThickness = 1.6;       // thickness of PCB
 nutThickness = 1.3;       // thickness of nut
 screwHeadDiameter = 6.3;  // diameter of screw head
-nutDiameter = 4.9;        // diameter of nut, point to point
+nutDiameter = 5.0;        // diameter of nut, point to point
 standoffDiameter = 3.2;   // diameter of standoff  FIXME!
 standoffHeight = 6;       // height of standoff  FIXME!!
 
@@ -77,9 +77,9 @@ diodes = [[ 83.6,  99.1,  0],
           [ 83.2, 117.1,  0],
           [ 96.4, 117.0,180],
           [ 97.8,  88.0,-90],
-          [119.9, 134.9,180],
-          [122.8, 133.9,-90],
-          [133.1, 133.8,-90],
+          [114.86, 144.75, 90],
+          [105.14, 133.32, 0],
+          [101.46, 144.75, 90],
           [121.5, 126.4, -5],
           [133.1, 109.3,175],
           [134.7,  91.4,175],
@@ -89,7 +89,7 @@ diodes = [[ 83.6,  99.1,  0],
           [163.5, 116.3,-115],
           [157.0, 130.6,-115],
          ];
-screws = [[103.8, 147.1, 0],
+screws = [[103.6, 149.06, 0],
           [151.5, 139.5, 0],
           [166.3,  95.5, 0],
           [ 98.14, 83.93, 0],
@@ -143,7 +143,7 @@ module screwHole() {
 module keySolderBumps() {  // Holes for bumps from solder joints/tabs of keys
                                // tabs
     translate([0, -2.5, 0])
-        cube([14, 11, 2.5], center=true);
+        cube([12, 11, 2.5], center=true);
     /* rotate([0, 0, 90]) { */
     /*     // Center tab hole */
     /*     cylinder(h=3, r=2.75, $fn=8, center=true); */
@@ -237,7 +237,7 @@ module thumbCluster(side) {
                     // Excess behind key hole
                     translate([2, thumbDisplacement, 0])
                         rotate(switchAngle)
-                        translate([10, 3, 0])
+                        translate([10, 1, 0])
                         cube([block.x/2, keyWidth, block.z - topThickness]);
 
                     // Cut out arch behind keys (extruding oval of correct size)
@@ -288,8 +288,8 @@ module thumbCluster(side) {
                     }
                     // Terminal holes
                     if (FINAL) {
-                        translate([127.9 - PCBOrigin.x, PCBOrigin.y - 136.36 - 1.27 * side, block.z - 9])
-                            cube([6, 6, 20], center=true);
+                        translate([108.16 - PCBOrigin.x, PCBOrigin.y - 140.77, block.z - 9])
+                            cube([10.5, 12, 20], center=true);
                     }
 
                     // Cut out locations of other surface components
@@ -302,8 +302,7 @@ module thumbCluster(side) {
                         }
                         // reset button FIXME: Position needs to be adjusted!
                         if (side == 1) {   // On right side, leave gap for solder bumps
-                            translate([171.3 - PCBOrigin.x, PCBOrigin.y - 103.5, block.z])
-                                rotate([0, 0, -25])
+                            translate([128.66 - PCBOrigin.x, PCBOrigin.y - 138.0, block.z])
                                 cube([8.6, 6.6, 2.5], center=true);
                         }
                         // String clip: FIXME: Position needs to be adjusted!
@@ -484,7 +483,6 @@ module thumbCluster(side) {
                 }  // difference
 
                 // BUMPERS
-
                 // 2. Inside far bumper: need to build this up
                 difference(){
                     rotate([0, -sliceAngle, 0])
@@ -507,4 +505,4 @@ module thumbCluster(side) {
 // right side
 thumbCluster("right");
 // left side
-// translate([0,-20,0]) thumbCluster("left");
+translate([0,-1,0]) thumbCluster("left");
