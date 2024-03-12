@@ -23,8 +23,8 @@ pcbThickness = 1.6;       // thickness of PCB
 nutThickness = 1.3;       // thickness of nut
 screwHeadDiameter = 6.3;  // diameter of screw head
 nutDiameter = 5.0;        // diameter of nut, point to point
-standoffDiameter = 3.2;   // diameter of standoff  FIXME!
-standoffHeight = 6;       // height of standoff  FIXME!!
+standoffDiameter = 3.2;   // diameter of standoff
+standoffHeight = 6;       // height of standoff
 
 bumperDia = 12.1;         // Diameter of bumpers + 2.1mm
 clipSlotLength = 14;      // length of slot in string clip
@@ -74,8 +74,8 @@ keys = [[ 88.7,  90.0,  0],
         [163.5, 138.6,-25],
        ];
 diodes = [[ 83.6,  99.1,  0],
-          [ 91.7,  98.9,  0],
-          [ 83.2, 117.1,  0],
+          [ 91.7,  99.1,  0],
+          [ 83.6, 117.0,  0],
           [ 96.4, 117.0,180],
           [ 97.8,  88.0,-90],
           [114.86, 144.75, 90],
@@ -301,13 +301,13 @@ module thumbCluster(side) {
                                 rotate([0, 0, 170])
                                 cube([11, 5, 2.5], center=true);
                         }
-                        // reset button FIXME: Position needs to be adjusted!
+                        // reset button
                         if (side == 1) {   // On right side, leave gap for solder bumps
-                            translate([128.66 - PCBOrigin.x, PCBOrigin.y - 138.0, block.z])
+                            translate([125.2 - PCBOrigin.x, PCBOrigin.y - 135.8, block.z])
                                 cube([8.6, 6.6, 2.5], center=true);
                         }
-                        // String clip: FIXME: Position needs to be adjusted!
-                        translate([PCBOrigin.x+5.1, 44, block.z-5]){
+                        // String clip:
+                        translate([PCBOrigin.x+5.1, PCBOrigin.y - 111.9, block.z-5]){
                             cube([clipSlotLength, clipThickness, 10]);
                         }
                         // ethernet jack
@@ -439,10 +439,11 @@ module thumbCluster(side) {
                             cylinder(h=block.z+2, r=5, center=true);
                     }
 
+                    // cut-out for nicenano
                     if (side==1) {  // right side
-                                    // cut-out for nicenano: 20 mm wide by 34 long ... but need thin layer for battery plus screws
+                        // nicenano: 20 mm wide by 34 long
                         translate([107.65 - PCBOrigin.x, PCBOrigin.y - 111.35 + 2, block.z/2])
-                            cube([22, 39, block.z+1], center=true);
+                            cube([21, 37, block.z+1], center=true);
                         // screws
                         translate([115.27 - PCBOrigin.x, PCBOrigin.y - 130.42, block.z/2]) {
                             // screw shaft
@@ -459,8 +460,6 @@ module thumbCluster(side) {
                                 cylinder(h=5, d=screwHeadDiameter, center=true);
                         }
                         // Cut-out for USB-C plug
-                        // #translate([107.65 - PCBOrigin.x, PCBOrigin.y - PCBTopEdge, block.z])
-                        //     cube([13, 30, 23], center=true);
                         translate([107.65 - PCBOrigin.x-6.5,
                                    PCBOrigin.y - PCBTopEdge - 15,
                                    block.z - 12.5])
