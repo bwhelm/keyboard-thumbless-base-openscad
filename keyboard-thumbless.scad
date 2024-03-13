@@ -58,7 +58,8 @@ block = [PCBRightPoint - PCBLeftPoint,               // length of block in conta
 sliceAngle = 90 - atan2(keyboardLength, block.z);    // angle at which to slice off bottom of feet
 
 // PCB keyhole positions
-keys = [[ 88.7,  90.0,  0],
+keys =                         // Location of key switches
+       [[ 88.7,  90.0,  0],
         [107.7,  88.0,  0],
         [130.5,  82.0, -5],
         [ 88.7, 108.0,  0],
@@ -73,7 +74,8 @@ keys = [[ 88.7,  90.0,  0],
         [171.0, 122.2,-25],
         [163.5, 138.6,-25],
        ];
-diodes = [[ 84.7,  99.1,  0],  // 83.6, 99.1
+diodes =                       // Location of diodes
+         [[ 84.7,  99.1,  0],  // 83.6, 99.1
           [ 91.7,  99.1,  0],
           [ 84.7, 117.0,  0],  // 83.6, 117.0
           [ 96.4, 117.0,180],
@@ -90,20 +92,16 @@ diodes = [[ 84.7,  99.1,  0],  // 83.6, 99.1
           [163.5, 116.3,-115],
           [157.0, 130.6,-115],
          ];
-screws = [[103.6, 149.06, 0],
+screws = [[103.6, 149.06, 0],  // Location of mounting screws
           [151.5, 139.50, 0],
           [166.3,  95.50, 0],
           [ 98.1,  82.25, 0],
          ];
-terminals = [[126.1, 138.9, 180],
-             [129.7, 138.9, 180],
-            ];
 
 module keyhole(side) {
     // side: -1 for left keyboard half, 1 for right
     // lower: 1 for lower key, 0 for upper
 
-    /* rotate([90, 0, 0]) { */
     // Key clip
     translate([switchClipDepth/2, 0, 0])
         cube([switchClipDepth+.01, switchClipSide, switchClipSide], center=true);
@@ -128,7 +126,6 @@ module keyhole(side) {
         }
     }
 }
-/* } */
 
 module screwHole() {
     rotate([0, 180, 0]){
@@ -141,42 +138,14 @@ module screwHole() {
     }
 }
 
-module keySolderBumps() {  // Holes for bumps from solder joints/tabs of keys
-                               // tabs
+module keySolderBumps() {  // Holes for bumps from solder joints/tabs of keys tabs
     translate([0, -2.5, 0])
         cube([12, 11, 2.5], center=true);
-    /* rotate([0, 0, 90]) { */
-    /*     // Center tab hole */
-    /*     cylinder(h=3, r=2.75, $fn=8, center=true); */
-    /*     // Side tab holes */
-    /*     translate([0, 5.5, 0]) */
-    /*         cylinder(h=3, r=1.75, $fn=8, center=true); */
-    /*     translate([0, -5.5, 0]) */
-    /*         cylinder(h=3, r=1.75, $fn=8, center=true); */
-    /*     // pin holes */
-    /*     translate([-5.9, 0, 0]) */
-    /*         cylinder(h=3, r=1.75, $fn=8, center=true); */
-    /*     translate([-3.8, side * 5, 0]) */
-    /*         cylinder(h=3, r=1.75, $fn=8, center=true); */
-    /* } */
 }
 
 module diodeSolderBumps() {  // Holes for bumps from solder joints of diodes
     translate([2.54, 0, 0])
         cube([9, 4, 2.5], center=true);
-    /* rotate([0, 0, 90]) { */
-    /*     cylinder(h=3, r=2, $fn=8, center=true); */
-    /*     translate([0, -5.08, 0]) */
-    /*         cylinder(h=3, r=2, $fn=8, center=true); */
-    /* } */
-}
-
-module terminalHoles(side) {  // Holes for bumps from solder joints of diodes
-    translate([0, -2.54, 0]) {
-        cylinder(h=block.z, r=1, center=true);
-        translate([0, side*2.54, 0])
-            cylinder(h=block.z, r=1, center=true);
-    }
 }
 
 module stringConnector() {
@@ -194,11 +163,7 @@ module stringConnector() {
     }
 }
 
-module solderHole() {
-    rotate([0, 90, 0]) cylinder(h=2.1, d=3, center=true);
-}
-
-module thumbCluster(side) {
+module main(side) {
     side = side == "left" ? -1 : 1;
     // flip the board if on the left side
     mirror([0, -(side - 1) / 2, 0])
@@ -207,41 +172,41 @@ module thumbCluster(side) {
                 difference() {
                     union() {
 
-                        // Main block
+                        // MAIN BLOCK
                         cube([block.x, PCBOrigin.y - PCBTopEdge, block.z]);  // Don't go all the way to end
                         translate([0, 0, block.z - topThickness])
                             cube([block.x-4, block.y, topThickness]); // Don't go all the way to end
 
-                        // Add string connector
+                        // ADD STRING CONNECTOR
                         translate([0, .6*block.y, block.z - stringHoleThickness / 2])
                             stringConnector();
 
-                        // Add rotated thumb block
+                        // ADD ROTATED THUMB BLOCK
                         translate([0, thumbDisplacement, -5])
                             rotate(switchAngle)
                             cube([keyWidth+10, keyWidth-.06, block.z + 5]);
 
                     }
 
-                    // Top key hole
+                    // TOP KEY HOLE
                     translate([-.05, thumbDisplacement, 0])
                         rotate(switchAngle)
                         translate([0, keyWidth/2, block.z - keyFromTop - (keyHeight)/2])
                         keyhole(side);
 
-                    // Bottom key hole
+                    // BOTTOM KEY HOLE
                     translate([-.05, thumbDisplacement, 0])
                         rotate(switchAngle)
                         translate([0, keyWidth/2, keyFromBottom + keyHeight/2])
                         keyhole(side);
 
-                    // Excess behind key hole
+                    // EXCESS BEHIND KEY HOLE
                     translate([2, thumbDisplacement, 0])
                         rotate(switchAngle)
                         translate([10, 1, 0])
                         cube([block.x/2, keyWidth, block.z - topThickness]);
 
-                    // Cut out arch behind keys (extruding oval of correct size)
+                    // CUT OUT ARCH BEHIND KEYS (EXTRUDING OVAL OF CORRECT SIZE)
                     translate([block.x + archFudge,
                             block.y/2,
                             -1.5]) // make sure to leave minimum thickness
@@ -250,19 +215,19 @@ module thumbCluster(side) {
                         resize([2*block.z, 2*(block.x - keyMinDepth)])
                         circle($fn=segments);
 
-                    // Cut out rectangle with keys
+                    // CUT OUT RECTANGLE WITH KEYS
                     translate([block.x/2,
                             (PCBOrigin.y - PCBTopEdge)/2 + keyWidth/2 - keyMinDepth/2,
                             block.z/2 - topThickness])
                         cube([block.x + 10, PCBOrigin.y - PCBTopEdge - keyWidth - keyMinDepth, block.z], center=true);
 
-                    // Slice angle off bottom of feet
+                    // SLICE ANGLE OFF BOTTOM OF FEET
                     translate([0, -.05, -10])
                         rotate([0, -sliceAngle, 0])
                         translate([-10, 0, 0])
                         cube([block.x*2 + .1, block.y + .1, 10], center=false);
 
-                    // Add holes for solder bumps
+                    // ADD HOLES FOR SOLDER BUMPS
                     // Keys
                     if (FINAL) {
                         for (location = keys) {
@@ -293,7 +258,7 @@ module thumbCluster(side) {
                             cube([10.5, 12, 20], center=true);
                     }
 
-                    // Cut out locations of other surface components
+                    // CUT OUT LOCATIONS OF OTHER SURFACE COMPONENTS
                     if (FINAL) {
                         // switch
                         if (side == 1) {   // Switch goes on right side only
@@ -317,24 +282,7 @@ module thumbCluster(side) {
                         /*     cube([20.1, 14.88, 3]); // cut-out for plug */
                     }
 
-                    /* // cut off far right side for rubber feet/clip */
-                    /* translate([block.x, block.y/2, block.z - 15]) { */
-                    /*     rotate([0, 0, -25]) { */
-                    /*         translate([3, -40, 0]) */
-                    /*             cube([15, 50, 30]); */
-                    /*         translate([-9.75, -5, 0]) */
-                    /*             cube([15, 50, 30]); */
-                    /*         translate([-19, 12, 0]) */
-                    /*             cube([15, 50, 30]); */
-                    /*         translate([-17, -5, 0]) */
-                    /*             cube([10, 7, 30]); */
-                    /*     } */
-                    /*     translate([-14.5, -1, 0]) */
-                    /*         cube([19, 10, 30]); */
-                    /* } */
-
-                    // Cut all other curves
-
+                    // CUT ALL OTHER CURVES
                     // Top left corner
                     difference() {
                         translate([2.5, PCBOrigin.y - PCBTopEdge - 2.5, block.z/2])
@@ -343,14 +291,12 @@ module thumbCluster(side) {
                             rotate([0, 0, 90])
                             cylinder(h=block.z+2, r=5, center=true);
                     }
-
                     // Top left edge
                     translate([-.1, PCBOrigin.y - PCBTopEdge, -.1])
                         cube([116.58 - PCBOrigin.x, 25, block.z+1], center=false);
                     translate([116.58 - PCBOrigin.x, PCBOrigin.y - PCBTopEdge + 5, block.z/2])
                         rotate([0, 0, 90])
                         cylinder(h=block.z+2, r=5, center=true);
-
                     // Transition to top arc
                     difference() {
                         translate([125.98 - PCBOrigin.x - 5, PCBOrigin.y - 77.07 + 1, -.5])
@@ -359,8 +305,6 @@ module thumbCluster(side) {
                             rotate([0, 0, 90])
                             cylinder(h=block.z+2, r=5, center=true);
                     }
-
-
                     // Bottom left corner
                     translate([0, thumbDisplacement, 0])
                         rotate(switchAngle)
@@ -371,18 +315,6 @@ module thumbCluster(side) {
                                 rotate([0, 0, 90])
                                 cylinder(h=block.z+2, r=2, center=true);
                         }
-
-                    // // Top corner of thumb
-                    // translate([0, -thumbDisplacement*1+1, 0])
-                    //     rotate(switchAngle)
-                    //     difference() {
-                    //         translate([-sin(switchAngle.z)*keyWidth+1, -sin(switchAngle.z)*thumbDisplacement-2.93, block.z/2])
-                    //             cube([2.01, 2.01, block.z+1], center=true);
-                    //         translate([-sin(switchAngle.z)*keyWidth+2, -sin(switchAngle.z)*thumbDisplacement-4, block.z/2])
-                    //             rotate([0, 0, 90])
-                    //             cylinder(h=block.z+2, r=2, center=true);
-                    //     }
-
                     // Top right arc
                     // r=89.27 x=126.72 y=161.34
                     // block: (126.18, 72.07) --> (181, 100)
@@ -393,12 +325,10 @@ module thumbCluster(side) {
                             rotate([0, 0, 90])
                             cylinder(h=block.z+2, r=89.27, $fn=segments, center=true);
                     }
-
                     // Bottom arc
                     translate([141.1 - PCBOrigin.x, PCBOrigin.y - 203.9, block.z/2])
                         rotate([0, 0, 90])
                         cylinder(h=block.z+2, r=59.78, $fn=segments, center=true);
-
                     // Smoothing transition to top right edge
                     difference() {
                         translate([176.03 - PCBOrigin.x + 2.5, PCBOrigin.y - 93.02, -.5])
@@ -407,7 +337,6 @@ module thumbCluster(side) {
                             rotate([0, 0, 90])
                             cylinder(h=block.z+2, r=5, center=true);
                     }
-
                     // Transition to bottom arc on left
                     difference() {
                         translate([102.9 - PCBOrigin.x-2.87, PCBOrigin.y - 156.92 -2.97, -.5])
@@ -416,11 +345,9 @@ module thumbCluster(side) {
                             rotate([0, 0, 90])
                             cylinder(h=block.z+2, r=2.86, center=true);
                     }
-
                     // Bottom right flat part
                     translate([176 - PCBOrigin.x, PCBOrigin.y - 150.2 - 10, block.z/2])
                         cube([20, 20, block.z+2], center=true);
-
                     // Transition to bottom arc on right
                     difference() {
                         translate([168.08 - PCBOrigin.x-5.2, PCBOrigin.y - 145.11 -5.2, -.5])
@@ -429,7 +356,6 @@ module thumbCluster(side) {
                             rotate([0, 0, 90])
                             cylinder(h=block.z+2, r=5.1, center=true);
                     }
-
                     // Bottom right corner
                     difference() {
                         translate([100 - 5, PCBOrigin.y - 145.1 - 5.2, -.5])
@@ -439,7 +365,7 @@ module thumbCluster(side) {
                             cylinder(h=block.z+2, r=5, center=true);
                     }
 
-                    // cut-out for nicenano
+                    // CUT-OUT FOR NICENANO
                     if (side==1) {  // right side
                         // nicenano: 20 mm wide by 34 long
                         translate([107.65 - PCBOrigin.x, PCBOrigin.y - 111.35 + 2, block.z/2])
@@ -466,7 +392,7 @@ module thumbCluster(side) {
                             cube([13, 30, 8.5]);
                     }
 
-                    // Cut out bumpers -- do it here, and then again later
+                    // CUT OUT BUMPERS -- do it here, and then again later
                     // 1. Inside close bumper
                     rotate([0, -sliceAngle, 0]) translate([bumperDia/2-5, bumperDia/2+6.5, .69])
                         cylinder(d=bumperDia-2, h=2, center=true);
@@ -500,9 +426,9 @@ module thumbCluster(side) {
 
         }  // translate
 
-}  // thumbCluster module
+}  // main module
 
 // right side
-thumbCluster("right");
+main("right");
 // left side
-translate([0,-1,0]) thumbCluster("left");
+translate([0,-1,0]) main("left");
