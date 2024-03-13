@@ -22,7 +22,7 @@ screwLength = 6;          // length of screw shaft
 pcbThickness = 1.6;       // thickness of PCB
 nutThickness = 1.3;       // thickness of nut
 screwHeadDiameter = 6.3;  // diameter of screw head
-nutDiameter = 5.0;        // diameter of nut, point to point
+nutDiameter = 5.2;        // diameter of nut, point to point (actually 5.0mm)
 standoffDiameter = 3.2;   // diameter of standoff
 standoffHeight = 6;       // height of standoff
 
@@ -73,9 +73,9 @@ keys = [[ 88.7,  90.0,  0],
         [171.0, 122.2,-25],
         [163.5, 138.6,-25],
        ];
-diodes = [[ 83.6,  99.1,  0],
+diodes = [[ 84.7,  99.1,  0],  // 83.6, 99.1
           [ 91.7,  99.1,  0],
-          [ 83.6, 117.0,  0],
+          [ 84.7, 117.0,  0],  // 83.6, 117.0
           [ 96.4, 117.0,180],
           [ 97.8,  88.0,-90],
           [114.86, 144.75, 90],
@@ -91,9 +91,9 @@ diodes = [[ 83.6,  99.1,  0],
           [157.0, 130.6,-115],
          ];
 screws = [[103.6, 149.06, 0],
-          [151.5, 139.5, 0],
-          [166.3,  95.5, 0],
-          [ 98.14, 83.93, 0],
+          [151.5, 139.50, 0],
+          [166.3,  95.50, 0],
+          [ 98.1,  82.25, 0],
          ];
 terminals = [[126.1, 138.9, 180],
              [129.7, 138.9, 180],
@@ -297,8 +297,8 @@ module thumbCluster(side) {
                     if (FINAL) {
                         // switch
                         if (side == 1) {   // Switch goes on right side only
-                            translate([145.1 - PCBOrigin.x, PCBOrigin.y - 80.0, block.z])
-                                rotate([0, 0, 170])
+                            translate([145.61 - PCBOrigin.x, PCBOrigin.y - 80.0, block.z])
+                                rotate([0, 0, 167])
                                 cube([11, 5, 2.5], center=true);
                         }
                         // reset button
@@ -307,12 +307,12 @@ module thumbCluster(side) {
                                 cube([8.6, 6.6, 2.5], center=true);
                         }
                         // String clip:
-                        translate([PCBOrigin.x+5.1, PCBOrigin.y - 111.9, block.z-5]){
-                            cube([clipSlotLength, clipThickness, 10]);
+                        translate([PCBOrigin.x+5.1 - 1, PCBOrigin.y - 111.9 - 1, block.z-5]){
+                            cube([clipSlotLength + 1, clipThickness + 2, 10]);
                         }
                         // ethernet jack
-                        translate([84 - PCBOrigin.x, PCBOrigin.y - 158.4, block.z-1.5])
-                            cube([15, 25.5, 3]);
+                        translate([84 - PCBOrigin.x, PCBOrigin.y - 158.7, block.z-1.5])
+                            cube([15.5, 25.5, 3]);
                         /* translate([64 - PCBOrigin.x, PCBOrigin.y - 153.80, block.z-1.5]) */
                         /*     cube([20.1, 14.88, 3]); // cut-out for plug */
                     }
