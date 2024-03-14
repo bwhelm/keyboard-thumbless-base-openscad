@@ -41,7 +41,7 @@ archAngle = 15;           // angle of rotation of arch under keys
 archFudge = 12;           // amount to move arch left
 
 // MCU Cover dimensions
-MCUCover = [27, 40, 2.5]; // dimensions of MCU cover
+MCUCover = [25.65, 41.15, 2.5]; // dimensions of MCU cover
 
 // PCB Coordinates
 PCBTopPoint = 72.07;      // Top y-coord on PCB
@@ -147,7 +147,7 @@ module sunkenScrew(x, y) {
         cylinder(h=block.z + .1, d=screwDiameter, center=true);
         // screw head
         translate([0, 0, block.z/2 + 0.5])
-            cylinder(h=5, d=screwHeadDiameter, center=true);
+            cylinder(h=4, d=screwHeadDiameter, center=true);
     }
 }
 
@@ -179,7 +179,7 @@ module stringConnector() {
 
 module MCUCover() {
     // MCU cover -- basically a block with screw holes
-    translate([-36, 0, block.z - MCUCover.z]) {
+    translate([-MCUCover.x-9, 0, block.z - MCUCover.z]) {
         difference() {
             dim = screwDiameter * 1.5;
             hull() {
@@ -189,9 +189,9 @@ module MCUCover() {
                 translate([MCUCover.x-dim/2, MCUCover.y-dim/2, 0]) cylinder(h=MCUCover.z, d=dim);
             }
             translate([ 2.6,  2.65, 0]) cylinder(h=2*MCUCover.z + .1, d=screwDiameter, center=true);
-            translate([ 2.6, 37.35, 0]) cylinder(h=2*MCUCover.z + .1, d=screwDiameter, center=true);
-            translate([24.4,  2.65, 0]) cylinder(h=2*MCUCover.z + .1, d=screwDiameter, center=true);
-            translate([24.4, 37.35, 0]) cylinder(h=2*MCUCover.z + .1, d=screwDiameter, center=true);
+            translate([ 2.6, 38.7, 0]) cylinder(h=2*MCUCover.z + .1, d=screwDiameter, center=true);
+            translate([23.2,  2.65, 0]) cylinder(h=2*MCUCover.z + .1, d=screwDiameter, center=true);
+            //translate([23.2, 38.7, 0]) cylinder(h=2*MCUCover.z + .1, d=screwDiameter, center=true);
         }
     }
 }
@@ -404,10 +404,10 @@ module main(side) {
                         translate([107.65 - PCBOrigin.x, PCBOrigin.y - 103.65 + 2, block.z/2])
                             cube([20, 36, block.z+1], center=true);
                         // screws
-                        sunkenScrew( 97.0, 121.5);  // bottom left
-                        sunkenScrew(118.3, 121.5);  // bottom right
-                        sunkenScrew( 96.5,  86.8);  // top left
-                        sunkenScrew(118.8,  86.8);  // top right
+                        sunkenScrew( 95.0, 121.45);  // bottom left
+                        sunkenScrew(115.75, 121.45);  // bottom right
+                        sunkenScrew( 95.0,  85.2);  // top left
+                        //sunkenScrew(115.75, 85.2);  // top right
                         // Cut-out for USB-C plug
                         translate([107.65 - PCBOrigin.x-6.5,
                                    PCBOrigin.y - PCBTopEdge - 15,
