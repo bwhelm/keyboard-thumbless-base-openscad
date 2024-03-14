@@ -75,9 +75,9 @@ keys =                         // Location of key switches
         [163.5, 138.6,-25],
        ];
 diodes =                       // Location of diodes
-         [[ 84.7,  99.1,  0],  // 83.6, 99.1
+         [[ 84.5,  99.1,  0],  // 83.6, 99.1
           [ 91.7,  99.1,  0],
-          [ 84.7, 117.0,  0],  // 83.6, 117.0
+          [ 84.5, 117.0,  0],  // 83.6, 117.0
           [ 96.4, 117.0,180],
           [ 97.8,  88.0,-90],
           [114.86, 144.75, 90],
@@ -140,7 +140,7 @@ module screwHole() {
 
 module keySolderBumps() {  // Holes for bumps from solder joints/tabs of keys tabs
     translate([0, -2.5, 0])
-        cube([12, 11, 2.5], center=true);
+        cube([12.5, 11, 2.5], center=true);
 }
 
 module diodeSolderBumps() {  // Holes for bumps from solder joints of diodes
@@ -228,7 +228,7 @@ module main(side) {
                         cube([block.x*2 + .1, block.y + .1, 10], center=false);
 
                     // ADD HOLES FOR SOLDER BUMPS
-                    // Keys
+                    // Key switches
                     if (FINAL) {
                         for (location = keys) {
                             translate([(location.x - PCBOrigin.x), PCBOrigin.y - location.y, block.z])
@@ -411,15 +411,30 @@ module main(side) {
                 // BUMPERS
                 // 2. Inside far bumper: need to build this up
                 difference(){
-                    rotate([0, -sliceAngle, 0])
-                        translate([bumperDia/2+.3, PCBTopEdge-3.5, 0.69])
-                        cylinder(d=bumperDia, h=stringHoleThickness);
-                    rotate([0, -sliceAngle, 0]) translate([bumperDia/2+.3, PCBTopEdge-3.5, 0.69]) cylinder(d=bumperDia-2, h=2, center=true);
-                    translate([-bumperDia/2, PCBTopEdge-2.4, -0.05]) {
-                        cube([bumperDia, bumperDia, bumperDia + .1]);
+                    union(){
+                        // Cylinder for bumper
+                        rotate([0, -sliceAngle, 0])
+                            translate([bumperDia/2+.3, PCBTopEdge-3.5, 0.643])
+                            cylinder(d=bumperDia, h=stringHoleThickness);
+                        // Sphere to go on top
+                        rotate([0, -sliceAngle, 0])
+                            translate([bumperDia/2+.35, PCBTopEdge-3.54, stringHoleThickness + 0.0])
+                            rotate([-10, 0, 0])
+                            sphere(d=bumperDia, $fn=128);
                     }
+                    // Hollow out spot for bumper inside cylinder
+                    rotate([0, -sliceAngle, 0]) translate([bumperDia/2+.3, PCBTopEdge-3.5, 0.643]) cylinder(d=bumperDia-2, h=2, center=true);
+                    // Slice off inside corner
+                    translate([-bumperDia/2, PCBTopEdge-2.4, -0.05]) {
+                        cube([bumperDia, bumperDia, 2*bumperDia + .1]);
+                    }
+                    // Slice off front edge
                     translate([-bumperDia, PCBTopEdge-bumperDia/2-3, 0])
-                        cube([bumperDia, bumperDia, bumperDia]);
+                        cube([bumperDia, bumperDia, 2*bumperDia]);
+                    // Slice off bottom (of sphere)
+                    rotate([0, -sliceAngle, 0])
+                        translate([0, PCBTopEdge-bumperDia+2.5, -bumperDia])
+                            cube([bumperDia, bumperDia, bumperDia]);
                 }
 
             }  // union
