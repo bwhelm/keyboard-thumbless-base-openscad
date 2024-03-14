@@ -179,9 +179,15 @@ module stringConnector() {
 
 module MCUCover() {
     // MCU cover -- basically a block with screw holes
-    translate([-40, 0, block.z - MCUCover.z]) {
+    translate([-36, 0, block.z - MCUCover.z]) {
         difference() {
-            cube(MCUCover);
+            dim = screwDiameter * 1.5;
+            hull() {
+                translate([dim/2, dim/2, 0]) cylinder(h=MCUCover.z, d=dim);
+                translate([MCUCover.x - dim/2, dim/2, 0]) cylinder(h=MCUCover.z, d=dim);
+                translate([dim/2, MCUCover.y-dim/2, 0]) cylinder(h=MCUCover.z, d=dim);
+                translate([MCUCover.x-dim/2, MCUCover.y-dim/2, 0]) cylinder(h=MCUCover.z, d=dim);
+            }
             translate([ 2.6,  2.65, 0]) cylinder(h=2*MCUCover.z + .1, d=screwDiameter, center=true);
             translate([ 2.6, 37.35, 0]) cylinder(h=2*MCUCover.z + .1, d=screwDiameter, center=true);
             translate([24.4,  2.65, 0]) cylinder(h=2*MCUCover.z + .1, d=screwDiameter, center=true);
