@@ -40,6 +40,9 @@ stringHolderLength = 3;  // length of string holder attached to top
 archAngle = 15;           // angle of rotation of arch under keys
 archFudge = 12;           // amount to move arch left
 
+// MCU Cover dimensions
+MCUCover = [27, 40, 2.5]; // dimensions of MCU cover
+
 // PCB Coordinates
 PCBTopPoint = 72.07;      // Top y-coord on PCB
 PCBBottomPoint = 159.79;  // Bottom y-coord on PCB  8.51
@@ -75,27 +78,27 @@ keys =                         // Location of key switches
         [163.5, 138.6,-25],
        ];
 diodes =                       // Location of diodes
-         [[ 84.5,  99.1,  0],  // 83.6, 99.1
-          [ 91.7,  99.1,  0],
-          [ 84.5, 117.0,  0],  // 83.6, 117.0
-          [ 96.4, 117.0,180],
-          [ 97.8,  88.0,-90],
+         [[ 84.5,  99.1,    0],  // 83.6, 99.1
+          [ 91.7,  99.1,    0],
+          [ 84.5, 117.0,    0],  // 83.6, 117.0
+          [ 96.4, 117.0,  180],
+          [ 88.6,  81.6,    0],  // 88.6, 80.95
           [114.86, 144.75, 90],
-          [105.14, 133.32, 0],
+          [105.14, 133.32,  0],
           [101.46, 144.75, 90],
-          [121.5, 126.4, -5],
-          [133.1, 109.3,175],
-          [134.7,  91.4,175],
-          [145.5,  95.9,-105],
-          [139.5, 115.0,-15],
-          [149.1,  98.6,-15],
-          [163.5, 116.3,-115],
-          [157.0, 130.6,-115],
+          [121.5,  126.4,  -5],
+          [133.1,  109.3, 175],
+          [134.7,   91.4, 175],
+          [145.5,   95.9,-105],
+          [139.5,  115.0, -15],
+          [149.1,   98.6, -15],
+          [163.5,  116.3,-115],
+          [157.0,  130.6,-115],
          ];
 screws = [[103.6, 149.06, 0],  // Location of mounting screws
           [151.5, 139.50, 0],
           [166.3,  95.50, 0],
-          [ 98.1,  82.25, 0],
+          [ 97.96, 81.80, 0],
          ];
 
 module keyhole(side) {
@@ -138,6 +141,17 @@ module screwHole() {
     }
 }
 
+module sunkenScrew(x, y) {
+    translate([x - PCBOrigin.x, PCBOrigin.y - y, block.z/2]) {
+        // screw shaft
+        cylinder(h=block.z + .1, d=screwDiameter, center=true);
+        // screw head
+        translate([0, 0, block.z/2 + 0.5])
+            cylinder(h=5, d=screwHeadDiameter, center=true);
+    }
+}
+
+
 module keySolderBumps() {  // Holes for bumps from solder joints/tabs of keys tabs
     translate([0, -2.5, 0])
         cube([12.5, 11, 2.5], center=true);
@@ -160,6 +174,19 @@ module stringConnector() {
         translate([-stringHolderLength/2 - stringHoleRadius, 0, 0])
                 rotate([0, 0, 90])
                 cylinder(h=stringHoleThickness + 1, r=stringHoleRadius, center=true);
+    }
+}
+
+module MCUCover() {
+    // MCU cover -- basically a block with screw holes
+    translate([-40, 0, block.z - MCUCover.z]) {
+        difference() {
+            cube(MCUCover);
+            translate([ 2.6,  2.65, 0]) cylinder(h=2*MCUCover.z + .1, d=screwDiameter, center=true);
+            translate([ 2.6, 37.35, 0]) cylinder(h=2*MCUCover.z + .1, d=screwDiameter, center=true);
+            translate([24.4,  2.65, 0]) cylinder(h=2*MCUCover.z + .1, d=screwDiameter, center=true);
+            translate([24.4, 37.35, 0]) cylinder(h=2*MCUCover.z + .1, d=screwDiameter, center=true);
+        }
     }
 }
 
@@ -368,23 +395,13 @@ module main(side) {
                     // CUT-OUT FOR NICENANO
                     if (side==1) {  // right side
                         // nicenano: 20 mm wide by 34 long
-                        translate([107.65 - PCBOrigin.x, PCBOrigin.y - 111.35 + 2, block.z/2])
-                            cube([21, 37, block.z+1], center=true);
+                        translate([107.65 - PCBOrigin.x, PCBOrigin.y - 103.65 + 2, block.z/2])
+                            cube([20, 36, block.z+1], center=true);
                         // screws
-                        translate([115.27 - PCBOrigin.x, PCBOrigin.y - 130.42, block.z/2]) {
-                            // screw shaft
-                            cylinder(h=block.z + .1, d=screwDiameter, center=true);
-                            // screw head
-                            translate([0, 0, block.z/2 + 0.5])
-                                cylinder(h=5, d=screwHeadDiameter, center=true);
-                        }
-                        translate([100.03 - PCBOrigin.x, PCBOrigin.y - 130.42, block.z/2]) {
-                            // screw shaft
-                            cylinder(h=block.z + .1, d=screwDiameter, center=true);
-                            // screw head
-                            translate([0, 0, block.z/2 + 0.5])
-                                cylinder(h=5, d=screwHeadDiameter, center=true);
-                        }
+                        sunkenScrew( 97.0, 121.5);  // bottom left
+                        sunkenScrew(118.3, 121.5);  // bottom right
+                        sunkenScrew( 96.5,  86.8);  // top left
+                        sunkenScrew(118.8,  86.8);  // top right
                         // Cut-out for USB-C plug
                         translate([107.65 - PCBOrigin.x-6.5,
                                    PCBOrigin.y - PCBTopEdge - 15,
@@ -445,5 +462,6 @@ module main(side) {
 
 // right side
 main("right");
+MCUCover();
 // left side
 translate([0,-1,0]) main("left");
