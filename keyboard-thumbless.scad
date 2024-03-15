@@ -89,10 +89,10 @@ diodes =                       // Location of diodes
           [121.5,  126.4,  -5],
           [133.1,  109.3, 175],
           [134.7,   91.4, 175],
-          [145.5,   95.9,-105],
-          [139.5,  115.0, -15],
-          [149.1,   98.6, -15],
-          [163.5,  116.3,-115],
+          [140.5,  115.0,-105],
+          [144.5,  116.3, -15],
+          [149.0,   98.8, -15],
+          [159.2,  125.5,  65],
           [157.0,  130.6,-115],
          ];
 screws = [[103.6, 149.06, 0],  // Location of mounting screws
@@ -250,9 +250,9 @@ module main(side) {
 
                     // CUT OUT RECTANGLE WITH KEYS
                     translate([block.x/2,
-                            (PCBOrigin.y - PCBTopEdge)/2 + keyWidth/2 - keyMinDepth/2,
+                            (PCBOrigin.y - PCBTopEdge)/2 + keyWidth/2 - topThickness/2,
                             block.z/2 - topThickness])
-                        cube([block.x + 10, PCBOrigin.y - PCBTopEdge - keyWidth - keyMinDepth, block.z], center=true);
+                        cube([block.x + 10, PCBOrigin.y - PCBTopEdge - keyWidth - topThickness, block.z], center=true);
 
                     // SLICE ANGLE OFF BOTTOM OF FEET
                     translate([0, -.05, -10])
@@ -401,8 +401,8 @@ module main(side) {
                     // CUT-OUT FOR NICENANO
                     if (side==1) {  // right side
                         // nicenano: 20 mm wide by 34 long
-                        translate([107.65 - PCBOrigin.x, PCBOrigin.y - 103.65 + 2, block.z/2])
-                            cube([20, 36, block.z+1], center=true);
+                        translate([107.65 - PCBOrigin.x, PCBOrigin.y - 103.13 + 2, block.z/2])
+                            cube([20, 37, block.z+1], center=true);
                         // screws
                         sunkenScrew( 95.0, 121.45);  // bottom left
                         sunkenScrew(115.75, 121.45);  // bottom right
@@ -413,6 +413,9 @@ module main(side) {
                                    PCBOrigin.y - PCBTopEdge - 15,
                                    block.z - 12.5])
                             cube([13, 30, 8.5]);
+                        // Cut out battery attachment pad
+                        translate([114.2 - PCBOrigin.x, PCBOrigin.y - 84.6, block.z])
+                            cube([5.5, 4.5, 2.5], center=true);
                     }
 
                     // CUT OUT BUMPERS -- do it here, and then again later
@@ -448,7 +451,7 @@ module main(side) {
                     // Hollow out spot for bumper inside cylinder
                     rotate([0, -sliceAngle, 0]) translate([bumperDia/2+.3, PCBTopEdge-3.5, 0.643]) cylinder(d=bumperDia-2, h=2, center=true);
                     // Slice off inside corner
-                    translate([-bumperDia/2, PCBTopEdge-2.4, -0.05]) {
+                    translate([-bumperDia/2, PCBTopEdge-1.4, -0.05]) {
                         cube([bumperDia, bumperDia, 2*bumperDia + .1]);
                     }
                     // Slice off front edge
