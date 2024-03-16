@@ -177,6 +177,14 @@ module stringConnector() {
     }
 }
 
+module screw(x, y, z) {
+    translate([x, y, 0]) {
+        cylinder(h=5.1, d=screwDiameter, center=true);
+        translate([0, 0, 0])
+            cylinder(h=2, d=screwHeadDiameter, center=true);
+    }
+}
+
 module MCUCover() {
     // MCU cover -- basically a block with screw holes
     translate([-MCUCover.x-9, 0, block.z - MCUCover.z]) {
@@ -188,10 +196,9 @@ module MCUCover() {
                 translate([dim/2, MCUCover.y-dim/2, 0]) cylinder(h=MCUCover.z, d=dim);
                 translate([MCUCover.x-dim/2, MCUCover.y-dim/2, 0]) cylinder(h=MCUCover.z, d=dim);
             }
-            translate([ 2.6,  2.65, 0]) cylinder(h=2*MCUCover.z + .1, d=screwDiameter, center=true);
-            translate([ 2.6, 38.7, 0]) cylinder(h=2*MCUCover.z + .1, d=screwDiameter, center=true);
-            translate([23.2,  2.65, 0]) cylinder(h=2*MCUCover.z + .1, d=screwDiameter, center=true);
-            //translate([23.2, 38.7, 0]) cylinder(h=2*MCUCover.z + .1, d=screwDiameter, center=true);
+            screw( 2.6, 2.65);
+            screw( 2.6,38.70);
+            screw(23.2, 2.65);
         }
     }
 }
