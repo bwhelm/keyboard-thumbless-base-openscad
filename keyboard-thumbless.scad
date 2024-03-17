@@ -41,7 +41,7 @@ archAngle = 15;           // angle of rotation of arch under keys
 archFudge = 12;           // amount to move arch left
 
 // MCU Cover dimensions
-MCUCover = [25.65, 41.15, 2.5]; // dimensions of MCU cover
+MCUCoverSize = [25.65, 41.15, 2.5]; // dimensions of MCU cover
 
 // PCB Coordinates
 PCBTopPoint = 72.07;      // Top y-coord on PCB
@@ -187,14 +187,14 @@ module screw(x, y, z) {
 
 module MCUCover() {
     // MCU cover -- basically a block with screw holes
-    translate([-MCUCover.x-9, 0, block.z - MCUCover.z]) {
+    translate([-MCUCoverSize.x-9, 0, block.z - MCUCoverSize.z]) {
         difference() {
             dim = screwDiameter * 1.5;
             hull() {
-                translate([dim/2, dim/2, 0]) cylinder(h=MCUCover.z, d=dim);
-                translate([MCUCover.x - dim/2, dim/2, 0]) cylinder(h=MCUCover.z, d=dim);
-                translate([dim/2, MCUCover.y-dim/2, 0]) cylinder(h=MCUCover.z, d=dim);
-                translate([MCUCover.x-dim/2, MCUCover.y-dim/2, 0]) cylinder(h=MCUCover.z, d=dim);
+                translate([dim/2, dim/2, 0]) cylinder(h=MCUCoverSize.z, d=dim);
+                translate([MCUCoverSize.x - dim/2, dim/2, 0]) cylinder(h=MCUCoverSize.z, d=dim);
+                translate([dim/2, MCUCoverSize.y-dim/2, 0]) cylinder(h=MCUCoverSize.z, d=dim);
+                translate([MCUCoverSize.x-dim/2, MCUCoverSize.y-dim/2, 0]) cylinder(h=MCUCoverSize.z, d=dim);
             }
             screw( 2.6, 2.65);
             screw( 2.6,38.70);
@@ -454,9 +454,13 @@ module main(side) {
                             translate([bumperDia/2+.35, PCBTopEdge-3.54, stringHoleThickness + 0.0])
                             rotate([-10, 0, 0])
                             sphere(d=bumperDia, $fn=128);
+                        // Fill in between sphere and back leg
+                        translate([bumperDia/2 - 1.5, PCBTopEdge-1.3, 6.0])
+                            rotate([90, 0, 0])
+                                cylinder(d=bumperDia, h=2.3);
                     }
                     // Hollow out spot for bumper inside cylinder
-                    rotate([0, -sliceAngle, 0]) translate([bumperDia/2+.3, PCBTopEdge-3.5, 0.643]) cylinder(d=bumperDia-2, h=2, center=true);
+                    rotate([0, -sliceAngle, 0]) translate([bumperDia/2+.3, PCBTopEdge-3.5, 0.69]) cylinder(d=bumperDia-2, h=2, center=true);
                     // Slice off inside corner
                     translate([-bumperDia/2, PCBTopEdge-1.4, -0.05]) {
                         cube([bumperDia, bumperDia, 2*bumperDia + .1]);
@@ -466,7 +470,7 @@ module main(side) {
                         cube([bumperDia, bumperDia, 2*bumperDia]);
                     // Slice off bottom (of sphere)
                     rotate([0, -sliceAngle, 0])
-                        translate([0, PCBTopEdge-bumperDia+2.5, -bumperDia])
+                        translate([0, PCBTopEdge-bumperDia+2.5, -bumperDia+0.65])
                             cube([bumperDia, bumperDia, bumperDia]);
                 }
 
