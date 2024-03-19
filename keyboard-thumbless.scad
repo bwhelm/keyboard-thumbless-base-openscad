@@ -18,10 +18,11 @@ keyMinDepth = 5;          // minimum depth of key (and of top support)
 topThickness = 4;         // thickness of top
 
 screwDiameter = 2.2;      // diameter of screws
+screwHeadDiameter = 6.3;  // diameter of screw head
+screwHeadThickness = 1.1; // thickness of screw head
 screwLength = 6;          // length of screw shaft
 pcbThickness = 1.6;       // thickness of PCB
 nutThickness = 1.3;       // thickness of nut
-screwHeadDiameter = 6.3;  // diameter of screw head
 nutDiameter = 5.2;        // diameter of nut, point to point (actually 5.0mm)
 standoffDiameter = 3.2;   // diameter of standoff
 standoffHeight = 6;       // height of standoff
@@ -40,8 +41,13 @@ stringHolderLength = 3;  // length of string holder attached to top
 archAngle = 15;           // angle of rotation of arch under keys
 archFudge = 12;           // amount to move arch left
 
-// MCU Cover dimensions
-MCUCoverSize = [25.65, 41.15, 2.5]; // dimensions of MCU cover
+niceNanoSize = [20, 37];  // dimensions of nice!nano cutout; nicenano: 20 mm wide by 34 long
+MCUCoverTopThickness = 1.5;  // thickness of top cover for MCU cover
+MCUCoverWallThickness = 1 + (standoffDiameter + screwHeadDiameter) / 2;
+MCUCoverSize = [niceNanoSize.x + MCUCoverWallThickness * 2,  // dimensions of MCU cover
+             niceNanoSize.y + MCUCoverWallThickness,
+             standoffHeight + 1 + MCUCoverTopThickness];
+MCUCoverScrewOffset = screwHeadDiameter / 2;
 
 // PCB Coordinates
 PCBTopPoint = 72.07;      // Top y-coord on PCB
@@ -141,16 +147,15 @@ module screwHole() {
     }
 }
 
-module sunkenScrew(x, y) {
-    translate([x - PCBOrigin.x, PCBOrigin.y - y, block.z/2]) {
+module sunkenScrew(x, y, z, r) {
+    translate([x, y, z - .02]) {
         // screw shaft
-        cylinder(h=block.z + .1, d=screwDiameter, center=true);
+        cylinder(h=z + .01, d=r + .01);
         // screw head
-        translate([0, 0, block.z/2 + 0.5])
-            cylinder(h=4, d=screwHeadDiameter, center=true);
+        translate([0, 0, z - screwHeadThickness + 0.02])
+            cylinder(h=screwHeadThickness + .01, d=screwHeadDiameter + .01);
     }
 }
-
 
 module keySolderBumps() {  // Holes for bumps from solder joints/tabs of keys tabs
     translate([0, -2.5, 0])
@@ -177,28 +182,38 @@ module stringConnector() {
     }
 }
 
-module screw(x, y, z) {
-    translate([x, y, 0]) {
-        cylinder(h=5.1, d=screwDiameter, center=true);
-        translate([0, 0, 0])
-            cylinder(h=2, d=screwHeadDiameter, center=true);
-    }
-}
-
 module MCUCover() {
     // MCU cover -- basically a block with screw holes
     translate([-MCUCoverSize.x-9, 0, block.z - MCUCoverSize.z]) {
         difference() {
-            dim = screwDiameter * 1.5;
+            // Main block
             hull() {
-                translate([dim/2, dim/2, 0]) cylinder(h=MCUCoverSize.z, d=dim);
-                translate([MCUCoverSize.x - dim/2, dim/2, 0]) cylinder(h=MCUCoverSize.z, d=dim);
-                translate([dim/2, MCUCoverSize.y-dim/2, 0]) cylinder(h=MCUCoverSize.z, d=dim);
-                translate([MCUCoverSize.x-dim/2, MCUCoverSize.y-dim/2, 0]) cylinder(h=MCUCoverSize.z, d=dim);
+                translate([screwHeadDiameter/2, screwHeadDiameter/2, 0])
+                    cylinder(h=MCUCoverSize.z, d=screwHeadDiameter);
+                translate([MCUCoverSize.x - screwHeadDiameter/2, screwHeadDiameter/2, 0])
+                    cylinder(h=MCUCoverSize.z, d=screwHeadDiameter);
+                translate([screwHeadDiameter/2, MCUCoverSize.y-screwHeadDiameter/2, 0])
+                    cylinder(h=MCUCoverSize.z, d=screwHeadDiameter);
+                translate([MCUCoverSize.x-screwHeadDiameter/2, MCUCoverSize.y-screwHeadDiameter/2, 0])
+                    cylinder(h=MCUCoverSize.z, d=screwHeadDiameter);
             }
-            screw( 2.6, 2.65);
-            screw( 2.6,38.70);
-            screw(23.2, 2.65);
+            // Cut out interior
+            translate([MCUCoverWallThickness, MCUCoverWallThickness + .01, -.01])
+                cube([niceNanoSize.x, niceNanoSize.y, MCUCoverSize.z - MCUCoverTopThickness]);
+            // Cut out screws
+            translate([0, 0, -MCUCoverSize.z]){
+                // bottom left
+                sunkenScrew(MCUCoverScrewOffset, MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1);
+                // top left
+                sunkenScrew(MCUCoverScrewOffset, MCUCoverSize.y - MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1);
+                // bottom right
+                sunkenScrew(MCUCoverSize.x - MCUCoverScrewOffset, MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1);
+                // top right
+                sunkenScrew(MCUCoverSize.x - MCUCoverScrewOffset, MCUCoverSize.y - MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1);
+            }
+            // Slice off end (to ensure it fits under main board
+            translate([0, MCUCoverSize.y - .2, 0])
+                cube([MCUCoverSize.x + .1, 5, MCUCoverSize.z + .1]);
         }
     }
 }
@@ -407,14 +422,27 @@ module main(side) {
 
                     // CUT-OUT FOR NICENANO
                     if (side==1) {  // right side
-                        // nicenano: 20 mm wide by 34 long
                         translate([107.65 - PCBOrigin.x, PCBOrigin.y - 103.13 + 2, block.z/2])
-                            cube([20, 37, block.z+1], center=true);
+                            cube([niceNanoSize.x, niceNanoSize.y, block.z+1], center=true);
                         // screws
-                        sunkenScrew( 95.0, 121.45);  // bottom left
-                        sunkenScrew(115.75, 121.45);  // bottom right
-                        sunkenScrew( 95.0,  85.2);  // top left
-                        //sunkenScrew(115.75, 85.2);  // top right
+                        translate([107.65 - PCBOrigin.x, PCBOrigin.y - 103.13 + 2, -block.z]) {
+                            sunkenScrew(-niceNanoSize.x/2 - standoffDiameter/2 - 1,    // bottom left
+                                          -niceNanoSize.y/2 - standoffDiameter/2 - 1,
+                                          block.z,
+                                          screwDiameter);
+                            sunkenScrew(niceNanoSize.x/2 + standoffDiameter/2 + 1,    // bottom right
+                                          -niceNanoSize.y/2 - standoffDiameter/2 - 1,
+                                          block.z,
+                                          screwDiameter);
+                            sunkenScrew(-niceNanoSize.x/2 - standoffDiameter/2 - 1,    // top left
+                                          niceNanoSize.y/2 - screwHeadDiameter/2,
+                                          block.z,
+                                          screwDiameter);
+                            sunkenScrew(niceNanoSize.x/2 + standoffDiameter/2 + 1,    // top right
+                                          niceNanoSize.y/2 - screwHeadDiameter/2,
+                                          block.z,
+                                          screwDiameter);
+                        }
                         // Cut-out for USB-C plug
                         translate([107.65 - PCBOrigin.x-6.5,
                                    PCBOrigin.y - PCBTopEdge - 15,
@@ -482,6 +510,8 @@ module main(side) {
 
 // right side
 main("right");
-MCUCover();
+/* translate([1.9, 34.4, block.z*2-MCUCoverSize.z-topThickness]) */
+/*     rotate([180, 0, 180]) */
+        MCUCover();
 // left side
 translate([0,-1,0]) main("left");
