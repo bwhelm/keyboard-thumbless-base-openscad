@@ -307,10 +307,15 @@ module main(side) {
                                 screwHole();
                         }
                     }
-                    // Terminal holes
+                    // Terminal block holes
                     if (FINAL) {
+                        // Cut out main hole for terminal block
                         translate([108.16 - PCBOrigin.x, PCBOrigin.y - 140.77, block.z - 9])
                             cube([10.5, 12, 20], center=true);
+                        // Cut a "ramp" to make it easier to insert wires into terminal block hole
+                        translate([101.56 - PCBOrigin.x, PCBOrigin.y - 140.77, block.z - 3.8])
+                            rotate([0, -20, 0])
+                                cube([10, 12, 3.01], center=true);
                     }
 
                     // CUT OUT LOCATIONS OF OTHER SURFACE COMPONENTS
@@ -331,7 +336,7 @@ module main(side) {
                             cube([clipSlotLength + 1, clipThickness + 2, 10]);
                         }
                         // ethernet jack
-                        translate([84 - PCBOrigin.x, PCBOrigin.y - 158.7, block.z-1.5])
+                        translate([84 - PCBOrigin.x, PCBOrigin.y - 158.7, block.z-2.8])
                             cube([15.5, 25.5, 3]);
                         /* translate([64 - PCBOrigin.x, PCBOrigin.y - 153.80, block.z-1.5]) */
                         /*     cube([20.1, 14.88, 3]); // cut-out for plug */
@@ -422,8 +427,8 @@ module main(side) {
 
                     // CUT-OUT FOR NICENANO
                     if (side==1) {  // right side
-                        translate([107.65 - PCBOrigin.x, PCBOrigin.y - 103.13 + 2, block.z/2])
-                            cube([niceNanoSize.x, niceNanoSize.y, block.z+1], center=true);
+                        translate([107.65 - PCBOrigin.x, PCBOrigin.y - 103.65 + 2, block.z/2+12])
+                            cube([niceNanoSize.x, niceNanoSize.y, 18], center=true);
                         // screws
                         translate([107.65 - PCBOrigin.x, PCBOrigin.y - 103.13 + 2, -block.z]) {
                             sunkenScrew(-niceNanoSize.x/2 - standoffDiameter/2 - 1,    // bottom left
@@ -446,7 +451,7 @@ module main(side) {
                         // Cut-out for USB-C plug
                         translate([107.65 - PCBOrigin.x-6.5,
                                    PCBOrigin.y - PCBTopEdge - 15,
-                                   block.z - 12.5])
+                                   block.z - 15.5])
                             cube([13, 30, 8.5]);
                         // Cut out battery attachment pad
                         translate([114.2 - PCBOrigin.x, PCBOrigin.y - 84.6, block.z])
@@ -514,4 +519,4 @@ main("right");
 /*     rotate([180, 0, 180]) */
         MCUCover();
 // left side
-translate([0,-1,0]) main("left");
+//translate([0,-1,0]) main("left");
