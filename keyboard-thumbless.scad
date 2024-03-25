@@ -25,7 +25,8 @@ pcbThickness = 1.6;       // thickness of PCB
 nutThickness = 1.3;       // thickness of nut
 nutDiameter = 5.2;        // diameter of nut, point to point (actually 5.0mm)
 standoffDiameter = 3.2;   // diameter of standoff
-standoffHeight = 6;       // height of standoff
+//standoffHeight = 6;       // height of standoff
+standoffHeight = 9;       // height needed for MCU under stand
 
 bumperDia = 12.1;         // Diameter of bumpers + 2.1mm
 clipSlotLength = 14;      // length of slot in string clip
@@ -187,14 +188,17 @@ module MCUCover() {
     translate([-MCUCoverSize.x-9, 0, block.z - MCUCoverSize.z]) {
         difference() {
             // Main block
+            // Use only 2 screws to hold the cover on, so this adjusts walls
+            // where there are no screws.
+            offset = MCUCoverWallThickness - MCUCoverTopThickness;
             hull() {
-                translate([screwHeadDiameter/2, screwHeadDiameter/2, 0])
+                translate([screwHeadDiameter/2 + offset, screwHeadDiameter/2 + offset, 0])
                     cylinder(h=MCUCoverSize.z, d=screwHeadDiameter);
                 translate([MCUCoverSize.x - screwHeadDiameter/2, screwHeadDiameter/2, 0])
                     cylinder(h=MCUCoverSize.z, d=screwHeadDiameter);
-                translate([screwHeadDiameter/2, MCUCoverSize.y-screwHeadDiameter/2, 0])
+                translate([screwHeadDiameter/2, MCUCoverSize.y - screwHeadDiameter/2, 0])
                     cylinder(h=MCUCoverSize.z, d=screwHeadDiameter);
-                translate([MCUCoverSize.x-screwHeadDiameter/2, MCUCoverSize.y-screwHeadDiameter/2, 0])
+                translate([MCUCoverSize.x - screwHeadDiameter/2 - offset, MCUCoverSize.y - screwHeadDiameter/2, 0])
                     cylinder(h=MCUCoverSize.z, d=screwHeadDiameter);
             }
             // Cut out interior
@@ -203,13 +207,13 @@ module MCUCover() {
             // Cut out screws
             translate([0, 0, -MCUCoverSize.z]){
                 // bottom left
-                sunkenScrew(MCUCoverScrewOffset, MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1);
+                //sunkenScrew(MCUCoverScrewOffset, MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1);
                 // top left
                 sunkenScrew(MCUCoverScrewOffset, MCUCoverSize.y - MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1);
                 // bottom right
                 sunkenScrew(MCUCoverSize.x - MCUCoverScrewOffset, MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1);
                 // top right
-                sunkenScrew(MCUCoverSize.x - MCUCoverScrewOffset, MCUCoverSize.y - MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1);
+                //sunkenScrew(MCUCoverSize.x - MCUCoverScrewOffset, MCUCoverSize.y - MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1);
             }
             // Slice off end (to ensure it fits under main board
             translate([0, MCUCoverSize.y - .2, 0])
@@ -435,14 +439,14 @@ module main(side) {
                                           -niceNanoSize.y/2 - standoffDiameter/2 - 1,
                                           block.z,
                                           screwDiameter);
-                            sunkenScrew(niceNanoSize.x/2 + standoffDiameter/2 + 1,    // bottom right
-                                          -niceNanoSize.y/2 - standoffDiameter/2 - 1,
-                                          block.z,
-                                          screwDiameter);
-                            sunkenScrew(-niceNanoSize.x/2 - standoffDiameter/2 - 1,    // top left
-                                          niceNanoSize.y/2 - screwHeadDiameter/2,
-                                          block.z,
-                                          screwDiameter);
+                            /* sunkenScrew(niceNanoSize.x/2 + standoffDiameter/2 + 1,    // bottom right */
+                            /*               -niceNanoSize.y/2 - standoffDiameter/2 - 1, */
+                            /*               block.z, */
+                            /*               screwDiameter); */
+                            /* sunkenScrew(-niceNanoSize.x/2 - standoffDiameter/2 - 1,    // top left */
+                            /*               niceNanoSize.y/2 - screwHeadDiameter/2, */
+                            /*               block.z, */
+                            /*               screwDiameter); */
                             sunkenScrew(niceNanoSize.x/2 + standoffDiameter/2 + 1,    // top right
                                           niceNanoSize.y/2 - screwHeadDiameter/2,
                                           block.z,
@@ -519,4 +523,4 @@ main("right");
 /*     rotate([180, 0, 180]) */
         MCUCover();
 // left side
-//translate([0,-1,0]) main("left");
+translate([0,-1,0]) main("left");
