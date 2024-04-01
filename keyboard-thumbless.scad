@@ -192,28 +192,49 @@ module MCUCover() {
             // where there are no screws.
             offset = MCUCoverWallThickness - MCUCoverTopThickness;
             hull() {
-                translate([screwHeadDiameter/2 + offset, screwHeadDiameter/2 + offset, 0])
-                    cylinder(h=MCUCoverSize.z, d=screwHeadDiameter);
-                translate([MCUCoverSize.x - screwHeadDiameter/2, screwHeadDiameter/2, 0])
-                    cylinder(h=MCUCoverSize.z, d=screwHeadDiameter);
-                translate([screwHeadDiameter/2, MCUCoverSize.y - screwHeadDiameter/2, 0])
-                    cylinder(h=MCUCoverSize.z, d=screwHeadDiameter);
-                translate([MCUCoverSize.x - screwHeadDiameter/2 - offset, MCUCoverSize.y - screwHeadDiameter/2, 0])
-                    cylinder(h=MCUCoverSize.z, d=screwHeadDiameter);
+                /* // Old version without rounded edges on top */
+                /* translate([screwHeadDiameter/2 + offset, screwHeadDiameter/2 + offset, 0]) */
+                /*     cylinder(h=MCUCoverSize.z, d=screwHeadDiameter); */
+                /* translate([MCUCoverSize.x - screwHeadDiameter/2, screwHeadDiameter/2, 0]) */
+                /*     cylinder(h=MCUCoverSize.z, d=screwHeadDiameter); */
+                /* translate([screwHeadDiameter/2, MCUCoverSize.y - screwHeadDiameter/2, 0]) */
+                /*     cylinder(h=MCUCoverSize.z, d=screwHeadDiameter); */
+                /* translate([MCUCoverSize.x - screwHeadDiameter/2 - offset, MCUCoverSize.y - screwHeadDiameter/2, 0]) */
+                /*     cylinder(h=MCUCoverSize.z, d=screwHeadDiameter); */
+                // Bottom left
+                translate([screwHeadDiameter/2 + offset - 1, screwHeadDiameter/2 + offset - 1, MCUCoverSize.z - 2])
+                    sphere(2);
+                translate([screwHeadDiameter/2 + offset - 1, screwHeadDiameter/2 + offset - 1, 0])
+                    cylinder(h=1, r=2);
+                // Bottom right
+                translate([MCUCoverSize.x - screwHeadDiameter/2 + 1, screwHeadDiameter/2 - 1, MCUCoverSize.z - 2])
+                    sphere(2);
+                translate([MCUCoverSize.x - screwHeadDiameter/2 + 1, screwHeadDiameter/2 - 1, 0])
+                    cylinder(h=1, r=2);
+                // Top left
+                translate([screwHeadDiameter/2 - 1, MCUCoverSize.y - screwHeadDiameter/2 + 1, MCUCoverSize.z - 2])
+                    sphere(2);
+                translate([screwHeadDiameter/2 - 1, MCUCoverSize.y - screwHeadDiameter/2 + 1, 0])
+                    cylinder(h=1, r=2);
+                // Top right
+                translate([MCUCoverSize.x - screwHeadDiameter/2 - offset + 1, MCUCoverSize.y - screwHeadDiameter/2 + 1, MCUCoverSize.z - 2])
+                    sphere(2);
+                translate([MCUCoverSize.x - screwHeadDiameter/2 - offset + 1, MCUCoverSize.y - screwHeadDiameter/2 + 1, 0])
+                    cylinder(h=1, r=2);
             }
             // Cut out interior
             translate([MCUCoverWallThickness, MCUCoverWallThickness + .01, -.01])
                 cube([niceNanoSize.x, niceNanoSize.y, MCUCoverSize.z - MCUCoverTopThickness]);
             // Cut out screws
             translate([0, 0, -MCUCoverSize.z]){
-                // bottom left
-                //sunkenScrew(MCUCoverScrewOffset, MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1);
-                // top left
+                /* // Bottom left */
+                /* sunkenScrew(MCUCoverScrewOffset, MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1); */
+                // Top left
                 sunkenScrew(MCUCoverScrewOffset, MCUCoverSize.y - MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1);
-                // bottom right
+                // Bottom right
                 sunkenScrew(MCUCoverSize.x - MCUCoverScrewOffset, MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1);
-                // top right
-                //sunkenScrew(MCUCoverSize.x - MCUCoverScrewOffset, MCUCoverSize.y - MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1);
+                /* // Top right */
+                /* sunkenScrew(MCUCoverSize.x - MCUCoverScrewOffset, MCUCoverSize.y - MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1); */
             }
             // Slice off end (to ensure it fits under main board
             translate([0, MCUCoverSize.y - .2, 0])
