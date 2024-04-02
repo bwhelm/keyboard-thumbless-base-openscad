@@ -141,11 +141,11 @@ module screwHole() {
     rotate([0, 180, 0]){
         // screw shaft
         translate([0, 0, -15])
-        cylinder(h=10 + .1, d=screwDiameter, center=true);
+            cylinder(h=10+.01, d=screwDiameter, center=true);
         // screw head
         translate([0, 0, -15 + screwLength - pcbThickness - nutThickness - 1])
             /* cylinder(h=block.z + .1, d=4.8, $fn=6, center=false); */
-            cylinder(h=10 + .1, d=nutDiameter, $fn=6, center=true);
+            cylinder(h=10, d=nutDiameter, $fn=6, center=true);
     }
 }
 
@@ -336,10 +336,10 @@ module main(side) {
                     // Terminal block holes
                     if (FINAL) {
                         // Cut out main hole for terminal block
-                        translate([108.16 - PCBOrigin.x, PCBOrigin.y - 140.77, block.z - 9])
+                        translate([108.16 - PCBOrigin.x, PCBOrigin.y - 140.71, block.z - 9])
                             cube([10.5, 12, 20], center=true);
                         // Cut a "ramp" to make it easier to insert wires into terminal block hole
-                        translate([101.56 - PCBOrigin.x, PCBOrigin.y - 140.77, block.z - 3.8])
+                        translate([101.56 - PCBOrigin.x, PCBOrigin.y - 140.71, block.z - 3.8])
                             rotate([0, -20, 0])
                                 cube([10, 12, 3.01], center=true);
                     }
