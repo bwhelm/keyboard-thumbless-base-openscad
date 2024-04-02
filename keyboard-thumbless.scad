@@ -140,11 +140,12 @@ module keyhole(side) {
 module screwHole() {
     rotate([0, 180, 0]){
         // screw shaft
-        cylinder(h=block.z + .1, d=screwDiameter, center=true);
+        translate([0, 0, -15])
+        cylinder(h=10 + .1, d=screwDiameter, center=true);
         // screw head
-        translate([0, 0, screwLength - pcbThickness - nutThickness - 1])
+        translate([0, 0, -15 + screwLength - pcbThickness - nutThickness - 1])
             /* cylinder(h=block.z + .1, d=4.8, $fn=6, center=false); */
-            cylinder(h=block.z + .1, d=nutDiameter, $fn=6, center=true);
+            cylinder(h=10 + .1, d=nutDiameter, $fn=6, center=true);
     }
 }
 
