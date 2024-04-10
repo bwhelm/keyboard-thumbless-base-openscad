@@ -347,13 +347,15 @@ module main(side) {
                     }
                     // Terminal block holes
                     if (FINAL) {
-                        // Cut out main hole for terminal block
-                        translate([108.16 - PCBOrigin.x, PCBOrigin.y - 140.71, block.z - 9])
-                            cube([10.5, 12, 20], center=true);
+                        // Cut out main hole for terminal block. Adjust the position depending on which side
+                        /* translate([108.16 - PCBOrigin.x, PCBOrigin.y - 140.71, block.z - 1]) */
+                        /*     cube([10.5, 12, 18], center=true); */
+                        translate([108.16 - PCBOrigin.x - side * 1.25, PCBOrigin.y - 140.71, block.z - 1])
+                            cube([8, 12, 18], center=true);
                         // Cut a "ramp" to make it easier to insert wires into terminal block hole
-                        translate([101.56 - PCBOrigin.x, PCBOrigin.y - 140.71, block.z - 3.8])
+                        translate([102.81 - PCBOrigin.x - side * 1.25, PCBOrigin.y - 140.71, block.z - 3.8])
                             rotate([0, -20, 0])
-                                cube([10, 12, 3.01], center=true);
+                            cube([10, 12, 3.01], center=true);
                     }
 
                     // CUT OUT LOCATIONS OF OTHER SURFACE COMPONENTS
