@@ -40,11 +40,11 @@ stringHolderLength = 3;  // length of string holder attached to top
 archAngle = 15;           // angle of rotation of arch under keys
 archFudge = 12;           // amount to move arch left
 
-niceNanoSize = [20, 37];  // dimensions of nice!nano cutout; nicenano: 20 mm wide by 34 long
+niceNanoSize = [18.5, 36];  // dimensions of nice!nano cutout; nicenano: 18 mm wide by 34 long
 MCUCoverTopThickness = 1.5;  // thickness of top cover for MCU cover
 MCUCoverWallThickness = 1 + (standoffDiameter + screwHeadDiameter) / 2;
 MCUCoverSize = [niceNanoSize.x + MCUCoverWallThickness * 2,  // dimensions of MCU cover
-             niceNanoSize.y + MCUCoverWallThickness,
+             niceNanoSize.y + MCUCoverWallThickness + .6,
              standoffHeight + 1 + MCUCoverTopThickness];
 MCUCoverScrewOffset = screwHeadDiameter / 2;
 
@@ -205,15 +205,6 @@ module MCUCover() {
             // where there are no screws.
             offset = MCUCoverWallThickness - MCUCoverTopThickness;
             hull() {
-                /* // Old version without rounded edges on top */
-                /* translate([screwHeadDiameter/2 + offset, screwHeadDiameter/2 + offset, 0]) */
-                /*     cylinder(h=MCUCoverSize.z, d=screwHeadDiameter); */
-                /* translate([MCUCoverSize.x - screwHeadDiameter/2, screwHeadDiameter/2, 0]) */
-                /*     cylinder(h=MCUCoverSize.z, d=screwHeadDiameter); */
-                /* translate([screwHeadDiameter/2, MCUCoverSize.y - screwHeadDiameter/2, 0]) */
-                /*     cylinder(h=MCUCoverSize.z, d=screwHeadDiameter); */
-                /* translate([MCUCoverSize.x - screwHeadDiameter/2 - offset, MCUCoverSize.y - screwHeadDiameter/2, 0]) */
-                /*     cylinder(h=MCUCoverSize.z, d=screwHeadDiameter); */
                 // Bottom left
                 translate([screwHeadDiameter/2 + offset - 1, screwHeadDiameter/2 + offset - 1, MCUCoverSize.z - 2])
                     sphere(2);
@@ -237,7 +228,7 @@ module MCUCover() {
             }
             // Cut out interior
             translate([MCUCoverWallThickness, MCUCoverWallThickness + .01, -.01])
-                cube([niceNanoSize.x, niceNanoSize.y, MCUCoverSize.z - MCUCoverTopThickness]);
+                cube([niceNanoSize.x, MCUCoverSize.y, MCUCoverSize.z - MCUCoverTopThickness]);
             // Cut out screws
             translate([0, 0, -MCUCoverSize.z]){
                 /* // Bottom left */
@@ -467,8 +458,11 @@ module main(side) {
 
                     // CUT-OUT FOR NICENANO
                     if (side==1) {  // right side
-                        translate([107.65 - PCBOrigin.x, PCBOrigin.y - 103.65 + 2, block.z/2+12])
-                            cube([niceNanoSize.x, niceNanoSize.y, 18], center=true);
+                        translate([107.65 - PCBOrigin.x - niceNanoSize.x/2,
+                                   PCBOrigin.y - 82.70 - 1,
+                                   block.z/2+24])
+                            rotate([180, 0, 0])
+                            cube([niceNanoSize.x, niceNanoSize.y - 1, 18], center=false);
                         // screws
                         translate([107.65 - PCBOrigin.x, PCBOrigin.y - 103.13 + 2, -block.z]) {
                             sunkenScrew(-niceNanoSize.x/2 - standoffDiameter/2 - 1,    // bottom left
@@ -484,7 +478,7 @@ module main(side) {
                             /*               block.z, */
                             /*               screwDiameter); */
                             sunkenScrew(niceNanoSize.x/2 + standoffDiameter/2 + 1,    // top right
-                                          niceNanoSize.y/2 - screwHeadDiameter/2,
+                                          niceNanoSize.y/2 - screwHeadDiameter/2 + .55,
                                           block.z,
                                           screwDiameter);
                         }
@@ -622,12 +616,12 @@ module clip(clipNumber){  // clipNumber = how many clips to produce
 main("right");
 
 // Left side
-translate([0,-1,0]) main("left");
+/* translate([0,-1,0]) main("left"); */
 
 // MCU Cover
-/* translate([1.9, 34.4, block.z*2-MCUCoverSize.z-topThickness]) */
+/* translate([2.7, 34.85, block.z*2-MCUCoverSize.z-topThickness]) */
 /*     rotate([180, 0, 180]) */
 MCUCover();
 
 // String clip
-clip(2);
+/* clip(2); */
