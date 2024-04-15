@@ -303,6 +303,17 @@ module main(side) {
                         rotate(switchAngle)
                         translate([10, 1, 0])
                         cube([block.x/2, keyWidth, block.z - topThickness]);
+                    // Undercut the bumper
+                    translate([2, thumbDisplacement, 0])
+                        rotate(switchAngle)
+                        translate([5.6, 1, 5])
+                        cube([block.x/2, keyWidth, block.z - topThickness - 5]);
+                    // Cut between thumb switches and wall
+                    translate([2, thumbDisplacement, 0])
+                        rotate(switchAngle)
+                        translate([-10, .5, 0])
+                        cube([block.x/2, .51, block.z - topThickness]);
+
 
                     // CUT OUT ARCH BEHIND KEYS (EXTRUDING OVAL OF CORRECT SIZE)
                     translate([block.x + archFudge,
@@ -640,7 +651,7 @@ main("right");
 // MCU Cover
 /* translate([2.7, 34.85, block.z*2-MCUCoverSize.z-topThickness]) */
 /*     rotate([180, 0, 180]) */
-MCUCover();
+/* MCUCover(); */
 
 // String clip
 /* clip(2); */
