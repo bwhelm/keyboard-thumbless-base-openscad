@@ -216,33 +216,47 @@ module MCUCover() {
                 translate([MCUCoverSize.x - screwHeadDiameter/2 + 1, screwHeadDiameter/2 - 1, 0])
                     cylinder(h=1, r=2);
                 // Top left
-                translate([screwHeadDiameter/2 - 1, MCUCoverSize.y - screwHeadDiameter/2 + 1, MCUCoverSize.z - 2])
+                translate([screwHeadDiameter/2 - 1,
+                           MCUCoverSize.y - screwHeadDiameter/2 + 1 + topThickness,
+                           MCUCoverSize.z - 2])
                     sphere(2);
-                translate([screwHeadDiameter/2 - 1, MCUCoverSize.y - screwHeadDiameter/2 + 1, 0])
+                translate([screwHeadDiameter/2 - 1,
+                           MCUCoverSize.y - screwHeadDiameter/2 + 1 + topThickness,
+                           0])
                     cylinder(h=1, r=2);
                 // Top right
-                translate([MCUCoverSize.x - screwHeadDiameter/2 - offset + 1, MCUCoverSize.y - screwHeadDiameter/2 + 1, MCUCoverSize.z - 2])
+                translate([MCUCoverSize.x - screwHeadDiameter/2 + 1,
+                           MCUCoverSize.y - screwHeadDiameter/2 + 1 + topThickness,
+                           MCUCoverSize.z - 2])
                     sphere(2);
-                translate([MCUCoverSize.x - screwHeadDiameter/2 - offset + 1, MCUCoverSize.y - screwHeadDiameter/2 + 1, 0])
+                translate([MCUCoverSize.x - screwHeadDiameter/2 + 1,
+                           MCUCoverSize.y - screwHeadDiameter/2 + 1 + topThickness,
+                           0])
                     cylinder(h=1, r=2);
             }
             // Cut out interior
             translate([MCUCoverWallThickness, MCUCoverWallThickness + .01, -.01])
-                cube([niceNanoSize.x, MCUCoverSize.y, MCUCoverSize.z - MCUCoverTopThickness]);
+                cube([niceNanoSize.x, MCUCoverSize.y - 1.91 - topThickness, MCUCoverSize.z - MCUCoverTopThickness]);
+            // Cut out USB hole
+            translate([MCUCoverSize.x/2 - screwHeadDiameter, MCUCoverSize.y-1, -0.1])
+                cube([13, 10, 8.5]);
             // Cut out screws
             translate([0, 0, -MCUCoverSize.z]){
                 /* // Bottom left */
                 /* sunkenScrew(MCUCoverScrewOffset, MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1); */
                 // Top left
-                sunkenScrew(MCUCoverScrewOffset, MCUCoverSize.y - MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1);
+                sunkenScrew(MCUCoverScrewOffset, MCUCoverSize.y - MCUCoverScrewOffset + topThickness, MCUCoverSize.z, standoffDiameter+.1);
                 // Bottom right
                 sunkenScrew(MCUCoverSize.x - MCUCoverScrewOffset, MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1);
-                /* // Top right */
-                /* sunkenScrew(MCUCoverSize.x - MCUCoverScrewOffset, MCUCoverSize.y - MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1); */
+                /* // Top right: This connects to screw on PCB! */
+                /* sunkenScrew(MCUCoverSize.x - MCUCoverScrewOffset - 2, */
+                /*             MCUCoverSize.y - MCUCoverScrewOffset + topThickness, */
+                /*             MCUCoverSize.z, */
+                /*             standoffDiameter+.1); */
             }
             // Slice off end (to ensure it fits under main board
-            translate([0, MCUCoverSize.y - .2, 0])
-                cube([MCUCoverSize.x + .1, 5, MCUCoverSize.z + .1]);
+            /* translate([0, MCUCoverSize.y - .2, 0]) */
+            /*     cube([MCUCoverSize.x + .1, 5, MCUCoverSize.z + .1]); */
         }
     }
 }
@@ -481,6 +495,11 @@ module main(side) {
                                           niceNanoSize.y/2 - screwHeadDiameter/2 + .55,
                                           block.z,
                                           screwDiameter);
+                        }
+                        translate([107.65 - PCBOrigin.x - MCUCoverSize.x/2,
+                                    PCBOrigin.y - 82.70 - 2,
+                                    -topThickness]) {
+                            cube([MCUCoverSize.x, 8, block.z]);
                         }
                         // Cut-out for USB-C plug
                         translate([107.65 - PCBOrigin.x-6.5,
