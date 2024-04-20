@@ -6,8 +6,7 @@ switchHoleSide = 14.5;    // size of square hole in mm
 switchClipSide = 13.8;    // size of square hole in mm
 switchClipDepth = 1.3;    // thickness of clips on switches
 switchHoleDepth = 2.2;    // depth of switch hole
-switchAngle = [0, 0, 25];  // angle to rotate thumb switches
-thumbDisplacement = -0;   // Amount thumb keys are displaced from bottom of board
+switchAngle = [0, 0, 25]; // angle to rotate thumb switches
 keyHeight = 18;           // space devoted to each key
 keyWidth = 19;
 keyFromTop = 3;           // distance of key from top of block
@@ -273,8 +272,6 @@ module MCUCover() {
 hingeDia = screwDiameter * 2.5;
 hingeHoleDia = hingeDia / 2.5;
 hingeThickness = 2;
-raiseThumbBlock = .2;  // Amount thumb block gets raised by hinge
-
 module hinge() {
     // Thumb Hinge
     difference(){
@@ -285,6 +282,8 @@ module hinge() {
         cylinder(d=hingeHoleDia, h=hingeThickness*2 + .1, center=true);
     }
 }
+
+raiseThumbBlock = .2;  // Amount thumb block gets raised by hinge
 
 module thumb(side) {
     thumbBlockThickness = 7;
@@ -305,29 +304,31 @@ module thumb(side) {
         translate([0, 0, -raiseThumbBlock]){
             union() {
                 difference() {
-                    union() {
-                        // ADD ROTATED THUMB BLOCK
-                        translate([0, thumbDisplacement, -3 - topThickness])
-                            rotate(switchAngle)
-                            cube([11.8, keyWidth-.06, block.z + 3]);
+                    // ADD ROTATED THUMB BLOCK
+                    translate([0, 0, -3 - topThickness])
+                        rotate(switchAngle)
+                        cube([11.8, keyWidth-.06, block.z + 3 + raiseThumbBlock]);
 
-                    } // union
+                    // bump for locking folding leg in place
+                    rotate(switchAngle)
+                    translate([4.5, -1.5, block.z - topThickness - 10])
+                        sphere(2);
 
                     // TOP KEY HOLE
-                    translate([-.05, thumbDisplacement, 0])
+                    translate([-.05, 0, 0])
                         rotate(switchAngle)
                         translate([0, keyWidth/2, block.z - keyFromTop - (keyHeight)/2])
                         keyhole(side);
 
                     // BOTTOM KEY HOLE
-                    translate([-.05, thumbDisplacement, 0])
+                    translate([-.05, 0, 0])
                         rotate(switchAngle)
                         translate([0, keyWidth/2, keyFromBottom + keyHeight/2])
                         keyhole(side);
 
                     // EXCESS BEHIND KEY HOLE
                     // Undercut the bumper
-                    translate([2, thumbDisplacement, 0])
+                    translate([2, 0, 0])
                         rotate(switchAngle)
                         /* translate([5.6, 0, 5]) */
                         translate([thumbBlockThickness - 1.81, 0, 5])
@@ -372,11 +373,8 @@ module thumb(side) {
                             translate([0, 0, -17.7]) hinge();
                             translate([0, 0, -12.0]) hinge();
                         }
-                            /* translate([0, 0, -8.85]) cylinder(d=2, h=17.7, center=true); */
                     }
                 }
-
-                // FIXME: Need to add a bump to lock thumbs in place!
 
             } // union
         } // translate
@@ -403,7 +401,7 @@ module leg(side){
         union(){
             difference() {
                 translate([0, 77.16, -raiseThumbBlock])
-                    cube([11.64, topThickness, block.z - topThickness - raiseThumbBlock]);
+                    cube([11.64, topThickness, block.z - topThickness + raiseThumbBlock]);
             }
 
             // BUMPERS
@@ -486,7 +484,7 @@ module main(side) {
                     translate([-2, -2, 0]) cube([100, 92, 23]);
 
                     // EXCESS BEHIND KEY HOLE
-                    translate([2, thumbDisplacement, 0])
+                    translate([2, 0, 0])
                         rotate(switchAngle)
                         translate([-6, .5, 0])
                         cube([block.x/2, keyWidth, block.z - topThickness]);
@@ -598,8 +596,7 @@ module main(side) {
                             cylinder(h=block.z+2, r=5, center=true);
                     }
                     // Bottom left corner
-                    translate([0, thumbDisplacement, 0])
-                        rotate(switchAngle)
+                    rotate(switchAngle)
                         difference() {
                             translate([1, 1-sin(switchAngle.z), block.z/2])
                                 cube([2.01, 2.01, block.z+1], center=true);
@@ -772,7 +769,6 @@ module main(side) {
                             }
                         }
                     }
-
                 }
 
                 // Back leg
@@ -784,13 +780,26 @@ module main(side) {
                     }
                 }
 
-                // bump for locking folding leg in place
+                // bump for locking back folding leg in place
                 if (side == -1) { // Left side only; right side goes on MCU Cover
-                    translate([13.1,
-                            78.9,
-                            block.z - topThickness - 8])
-                        sphere(2);
+                    difference() {
+                        translate([13.1, 78.9, block.z - topThickness - 8])
+                            sphere(2);
+                        // lop off edge part of sphere that sticks out on inside wall
+                        translate([11.5, 76.2, block.z - topThickness - 10])
+                            cube([3, 1, 3]);
+                    }
                 }
+
+                // bump for locking thumb folding leg in place
+                difference() {
+                    rotate(switchAngle)
+                        translate([4.5, -1.6, block.z - topThickness - 10.2])
+                        sphere(2);
+                    translate([1.5, -4, block.z - topThickness - 15])
+                        cube([10, 4, 10]);
+                }
+
 
             }  // union
 
@@ -864,12 +873,12 @@ module clip(clipNumber){  // clipNumber = how many clips to produce
 
 // GENERATE MODEL
 
-// Right side
+// RIGHT SIDE
 main("right");
 thumb("right");
 leg("right");
 
-/* // Left side */
+// LEFT SIDE
 translate([0,-1,0]) {
     main("left");
     thumb("left");
@@ -892,5 +901,5 @@ translate([-1, 91, 0]) {
 /*     } */
 /* } */
 
-// String clip
+// STRING CLIP
 clip(2);
