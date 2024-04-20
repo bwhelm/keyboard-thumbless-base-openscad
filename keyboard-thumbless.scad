@@ -1,13 +1,12 @@
 $fn= $preview ? 32 : 128; // render more accurately than preview
 segments = $preview ? 32 : 512;  // render some curves more accurately still
-FINAL = true;             // Don't render everything when false!
+FINAL = false;             // Don't render everything when false!
 
 switchHoleSide = 14.5;    // size of square hole in mm
 switchClipSide = 13.8;    // size of square hole in mm
 switchClipDepth = 1.3;    // thickness of clips on switches
 switchHoleDepth = 2.2;    // depth of switch hole
-switchAngleZ = 25;        // Angle to rotate thum switches on Z axis
-switchAngle = [0, 0, switchAngleZ];  // angle to rotate thumb switches
+switchAngle = [0, 0, 25];  // angle to rotate thumb switches
 thumbDisplacement = -0;   // Amount thumb keys are displaced from bottom of board
 keyHeight = 18;           // space devoted to each key
 keyWidth = 19;
@@ -261,6 +260,133 @@ module MCUCover() {
     }
 }
 
+hingeDia = screwDiameter * 2.5;
+hingeHoleDia = hingeDia / 2.5;
+hingeThickness = 2;
+raiseThumbBlock = .2;  // Amount thumb block gets raised by hinge
+
+module hinge() {
+    // Thumb Hinge
+    difference(){
+        union(){
+            cylinder(d=hingeDia, h=hingeThickness);
+            translate([-hingeDia/2 - 1, -hingeDia/2, 0]) cube([hingeDia/2 + 1, hingeDia, hingeThickness]);
+        }
+        cylinder(d=hingeHoleDia, h=hingeThickness*2 + .1, center=true);
+    }
+}
+
+module thumb(side) {
+    thumbBlockThickness = 7;
+    side = side == "left" ? -1 : 1;
+
+    // put thumb block on baseplate for printing
+    translate([(1 + side) * -9.5 - 1, (1 + side) * 19.5 - 3, block.z])
+    rotate([90, 90, 0])
+    rotate([0, 0, side * -switchAngle.z])
+
+    /* // flip thumb block to folded position (approximate) */
+    /* translate([38.5, side * 18, block.z-17]) */
+    /* rotate([0, -90, side * switchAngle.z]) */
+    /* rotate([0, 0, side * -switchAngle.z]) */
+
+    // flip the board if on the left side
+    mirror([0, -(side - 1) / 2, 0]){
+        translate([0, 0, -raiseThumbBlock]){
+            union() {
+                difference() {
+                    union() {
+                        // ADD ROTATED THUMB BLOCK
+                        translate([0, thumbDisplacement, -3 - topThickness])
+                            rotate(switchAngle)
+                            cube([11.8, keyWidth-.06, block.z + 3]);
+
+                    } // union
+
+                    // TOP KEY HOLE
+                    translate([-.05, thumbDisplacement, 0])
+                        rotate(switchAngle)
+                        translate([0, keyWidth/2, block.z - keyFromTop - (keyHeight)/2])
+                        keyhole(side);
+
+                    // BOTTOM KEY HOLE
+                    translate([-.05, thumbDisplacement, 0])
+                        rotate(switchAngle)
+                        translate([0, keyWidth/2, keyFromBottom + keyHeight/2])
+                        keyhole(side);
+
+                    // EXCESS BEHIND KEY HOLE
+                    // Undercut the bumper
+                    translate([2, thumbDisplacement, 0])
+                        rotate(switchAngle)
+                        /* translate([5.6, 0, 5]) */
+                        translate([thumbBlockThickness - 1.81, 0, 5])
+                        cube([block.x/2, keyWidth+1, block.z - topThickness - 3]);
+
+                    // CUT OUT ARCH BEHIND KEYS (EXTRUDING OVAL OF CORRECT SIZE)
+                    translate([block.x + archFudge,
+                            block.y/2,
+                            -1.5 + raiseThumbBlock]) // make sure to leave minimum thickness
+                        rotate([90+archAngle, 90, 0]) // archAngle
+                        linear_extrude(height=2*block.y, center=true)
+                        resize([2*block.z, 2*(block.x - keyMinDepth)])
+                        circle($fn=segments);
+
+                    // CUT OUT RECTANGLE WITH KEYS
+                    translate([block.x/2,
+                               (PCBOrigin.y - PCBTopEdge)/2 + keyWidth/2 - topThickness/2,
+                               block.z/2 - topThickness])
+                        cube([block.x + 10, PCBOrigin.y - PCBTopEdge - keyWidth - topThickness, block.z + 1], center=true);
+
+                    // SLICE ANGLE OFF BOTTOM OF FEET
+                    translate([0, -.05, -10])
+                        rotate([0, -sliceAngle, 0])
+                            translate([-10, 0, raiseThumbBlock - 10])
+                                cube([block.x*2 + .1, block.y + .1, 20], center=false);
+
+                    // Bumper
+                    rotate([0, -sliceAngle, 0]) translate([bumperDia/2-5, bumperDia/2+6.5, .69])
+                        cylinder(d=bumperDia-2, h=2, center=true);
+                } // difference
+
+                // HINGE PIECES
+                rotate([90, 0, switchAngle.z]){
+                    translate([4.3 + hingeDia, block.z - topThickness - hingeDia/2, 0]){
+                        // Need to put hinges in different spots to avoid the switch wires
+                        if (side == 1){ // if right side
+                            translate([0, 0,  -2.0]) hinge();
+                            translate([0, 0,  -8.0]) hinge();
+                            translate([0, 0, -15.6]) hinge();
+                        } else { // if left side
+                            translate([0, 0,  -4.1]) hinge();
+                            translate([0, 0, -17.7]) hinge();
+                            translate([0, 0, -12.0]) hinge();
+                        }
+                            /* translate([0, 0, -8.85]) cylinder(d=2, h=17.7, center=true); */
+                    }
+                }
+
+                // FIXME: Need to add a bump to lock thumbs in place!
+
+            } // union
+        } // translate
+    } // mirror
+}
+
+module leg(side){
+    #difference(){
+    translate([0, 77.16, raiseThumbBlock])
+        cube([11.64, topThickness, block.z - topThickness - raiseThumbBlock]);
+
+    // SLICE ANGLE OFF BOTTOM OF FEET
+    translate([0, -.05, -10])
+        rotate([0, -sliceAngle, 0])
+        translate([-10, 0, raiseThumbBlock - 10])
+        cube([block.x*2 + .1, block.y + .1, 20], center=false);
+
+        }
+}
+
 module main(side) {
     side = side == "left" ? -1 : 1;
     // flip the board if on the left side
@@ -279,40 +405,48 @@ module main(side) {
                         translate([0, .6*block.y, block.z - stringHoleThickness / 2])
                             stringConnector();
 
-                        // ADD ROTATED THUMB BLOCK
-                        translate([0, thumbDisplacement, -5])
-                            rotate(switchAngle)
-                            cube([keyWidth+10, keyWidth-.06, block.z + 5]);
+                        /* // ADD ROTATED THUMB BLOCK */
+                        /* translate([0, thumbDisplacement, -5]) */
+                        /*     rotate(switchAngle) */
+                        /*     cube([keyWidth+10, keyWidth-.06, block.z + 5]); */
 
                     }
 
-                    // TOP KEY HOLE
-                    translate([-.05, thumbDisplacement, 0])
-                        rotate(switchAngle)
-                        translate([0, keyWidth/2, block.z - keyFromTop - (keyHeight)/2])
-                        keyhole(side);
+                    /* // TOP KEY HOLE */
+                    /* translate([-.05, thumbDisplacement, 0]) */
+                    /*     rotate(switchAngle) */
+                    /*     translate([0, keyWidth/2, block.z - keyFromTop - (keyHeight)/2]) */
+                    /*     keyhole(side); */
 
-                    // BOTTOM KEY HOLE
-                    translate([-.05, thumbDisplacement, 0])
-                        rotate(switchAngle)
-                        translate([0, keyWidth/2, keyFromBottom + keyHeight/2])
-                        keyhole(side);
+                    /* // BOTTOM KEY HOLE */
+                    /* translate([-.05, thumbDisplacement, 0]) */
+                    /*     rotate(switchAngle) */
+                    /*     translate([0, keyWidth/2, keyFromBottom + keyHeight/2]) */
+                    /*     keyhole(side); */
+
+                    // FIXME: Uncomment this!
+                    /* // SLICE OFF BACK EDGE (to height of folded thumb block) */
+                    /* translate([-2, -2, 0]) cube([100, 92, 23]); */
 
                     // EXCESS BEHIND KEY HOLE
                     translate([2, thumbDisplacement, 0])
                         rotate(switchAngle)
-                        translate([10, 1, 0])
+                        translate([-6, .5, 0])
                         cube([block.x/2, keyWidth, block.z - topThickness]);
-                    // Undercut the bumper
-                    translate([2, thumbDisplacement, 0])
-                        rotate(switchAngle)
-                        translate([5.6, 1, 5])
-                        cube([block.x/2, keyWidth, block.z - topThickness - 5]);
-                    // Cut between thumb switches and wall
-                    translate([2, thumbDisplacement, 0])
-                        rotate(switchAngle)
-                        translate([-10, .5, 0])
-                        cube([block.x/2, .51, block.z - topThickness]);
+                    /* // Undercut the bumper */
+                    /* translate([2, thumbDisplacement, 0]) */
+                    /*     rotate(switchAngle) */
+                    /*     translate([5.6, 1, 5]) */
+                    /*     cube([block.x/2, keyWidth, block.z - topThickness - 5]); */
+                    /* // Cut between thumb switches and wall */
+                    /* #translate([2, thumbDisplacement, 0]) */
+                    /*     rotate(switchAngle) */
+                    /*     translate([-10, .5, 0]) */
+                    /*     cube([block.x/2, .51, block.z - topThickness]); */
+                    /* // Cut between thumb switches and top */
+                    /* translate([-1, -.5, block.z - topThickness - .5]) */
+                    /*     rotate(switchAngle) */
+                    /*     cube([10, keyWidth+2, .5]); */
 
 
                     // CUT OUT ARCH BEHIND KEYS (EXTRUDING OVAL OF CORRECT SIZE)
@@ -484,16 +618,16 @@ module main(side) {
                     // CUT-OUT FOR NICENANO
                     if (side==1) {  // right side
                         translate([107.65 - PCBOrigin.x - niceNanoSize.x/2,
-                                   PCBOrigin.y - 82.70 - 1,
-                                   block.z/2+24])
+                                PCBOrigin.y - 82.70 - 1,
+                                block.z/2+24])
                             rotate([180, 0, 0])
                             cube([niceNanoSize.x, niceNanoSize.y - 1, 18], center=false);
                         // screws
                         translate([107.65 - PCBOrigin.x, PCBOrigin.y - 103.13 + 2, -block.z]) {
                             sunkenScrew(-niceNanoSize.x/2 - standoffDiameter/2 - 1,    // bottom left
-                                          -niceNanoSize.y/2 - standoffDiameter/2 - 1,
-                                          block.z,
-                                          screwDiameter);
+                                    -niceNanoSize.y/2 - standoffDiameter/2 - 1,
+                                    block.z,
+                                    screwDiameter);
                             /* sunkenScrew(niceNanoSize.x/2 + standoffDiameter/2 + 1,    // bottom right */
                             /*               -niceNanoSize.y/2 - standoffDiameter/2 - 1, */
                             /*               block.z, */
@@ -503,19 +637,19 @@ module main(side) {
                             /*               block.z, */
                             /*               screwDiameter); */
                             sunkenScrew(niceNanoSize.x/2 + standoffDiameter/2 + 1,    // top right
-                                          niceNanoSize.y/2 - screwHeadDiameter/2 + .55,
-                                          block.z,
-                                          screwDiameter);
+                                    niceNanoSize.y/2 - screwHeadDiameter/2 + .55,
+                                    block.z,
+                                    screwDiameter);
                         }
                         translate([107.65 - PCBOrigin.x - MCUCoverSize.x/2,
-                                    PCBOrigin.y - 82.70 - 2,
-                                    -topThickness]) {
+                                PCBOrigin.y - 82.70 - 2,
+                                -topThickness]) {
                             cube([MCUCoverSize.x, 8, block.z]);
                         }
                         // Cut-out for USB-C plug
                         translate([107.65 - PCBOrigin.x-6.5,
-                                   PCBOrigin.y - PCBTopEdge - 15,
-                                   block.z - 15.5])
+                                PCBOrigin.y - PCBTopEdge - 15,
+                                block.z - 15.5])
                             cube([13, 30, 8.5]);
                         // Cut out battery attachment pad
                         translate([114.2 - PCBOrigin.x, PCBOrigin.y - 84.6, block.z])
@@ -523,9 +657,9 @@ module main(side) {
                     }
 
                     // CUT OUT BUMPERS -- do it here, and then again later
-                    // 1. Inside close bumper
-                    rotate([0, -sliceAngle, 0]) translate([bumperDia/2-5, bumperDia/2+6.5, .69])
-                        cylinder(d=bumperDia-2, h=2, center=true);
+                    /* // 1. Inside close bumper (thumb) */
+                    /* rotate([0, -sliceAngle, 0]) translate([bumperDia/2-5, bumperDia/2+6.5, .69]) */
+                    /*     cylinder(d=bumperDia-2, h=2, center=true); */
                     // 2. Inside far bumper
                     rotate([0, -sliceAngle, 0]) translate([bumperDia/2+.3, PCBTopEdge-3.5, .69])
                         cylinder(d=bumperDia-2, h=2, center=true);
@@ -554,7 +688,7 @@ module main(side) {
                         // Fill in between sphere and back leg
                         translate([bumperDia/2 - 1.5, PCBTopEdge-1.3, 6.0])
                             rotate([90, 0, 0])
-                                cylinder(d=bumperDia, h=2.3);
+                            cylinder(d=bumperDia, h=2.3);
                     }
                     // Hollow out spot for bumper inside cylinder
                     rotate([0, -sliceAngle, 0]) translate([bumperDia/2+.3, PCBTopEdge-3.5, 0.69]) cylinder(d=bumperDia-2, h=2, center=true);
@@ -568,7 +702,33 @@ module main(side) {
                     // Slice off bottom (of sphere)
                     rotate([0, -sliceAngle, 0])
                         translate([0, PCBTopEdge-bumperDia+2.5, -bumperDia+0.65])
-                            cube([bumperDia, bumperDia, bumperDia]);
+                        cube([bumperDia, bumperDia, bumperDia]);
+                }
+
+                // HINGE PIECES
+                rotate([90, 0, switchAngle.z]){
+                    translate([4.3 + hingeDia, block.z - topThickness - hingeDia/2 - raiseThumbBlock, 0]){
+                        rotate([0, 0, -90]){
+                            // Need to put hinges in different spots to avoid the switch wires
+                            if (side == 1) { // if right side
+                                translate([0, 0, -13.5]) hinge();
+                                translate([0, 0, -4.1]) hinge();
+                                difference(){
+                                    translate([0, 0, -17.7]) hinge();
+                                    // Cut off part of hinge sticking out over edge of board
+                                    rotate([switchAngle.z, 0, 0])
+                                        translate([-7, -18.88, -20]) cube([10, 10, 10]);
+                                }
+                            } else { // if left side
+                                translate([0, 0,  -2.0]) hinge();
+                                translate([0, 0,  -6.2]) hinge();
+                                translate([0, 0,  -14.1]) hinge();
+                            }
+                        }
+                    }
+
+                // FIXME: Need to add a bump to lock thumbs in place!
+
                 }
 
             }  // union
@@ -644,14 +804,32 @@ module clip(clipNumber){  // clipNumber = how many clips to produce
 // GENERATE MODEL
 // Right side
 main("right");
+/* thumb("right"); */
+leg("right");
 
-// Left side
-/* translate([0,-1,0]) main("left"); */
+/* // Left side */
+/* translate([0,-1,0]){ */
+/*     main("left"); */
+/*     thumb("left"); */
+/*     /1* leg("left"); *1/ */
+/* } */
 
-// MCU Cover
+// MCU COVER
+
+/* // For printing */
+/* translate([-1, 91, 0]) */
+/* rotate([0, 0, 90]) */
+/*     MCUCover(); */
+
+/* // Put in place */
 /* translate([2.7, 34.85, block.z*2-MCUCoverSize.z-topThickness]) */
 /*     rotate([180, 0, 180]) */
 /* MCUCover(); */
 
 // String clip
 /* clip(2); */
+
+// Pins for hinges
+// Thumb pins
+/* translate([23, 0, block.z - 17.7]) cylinder(d=hingeHoleDia-.2, h=17.7, center=false); */
+/* translate([26, 0, block.z - 17.7]) cylinder(d=hingeHoleDia-.2, h=17.7, center=false); */
