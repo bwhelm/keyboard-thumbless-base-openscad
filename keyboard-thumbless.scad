@@ -281,10 +281,10 @@ module thumb(side) {
     thumbBlockThickness = 7;
     side = side == "left" ? -1 : 1;
 
-    /* // put on baseplate for printing */
-    /* translate([(1 + side) * -9.5 - 1, (1 + side) * 19.5 - 3, block.z]) */
-    /* rotate([90, 90, 0]) */
-    /* rotate([0, 0, side * -switchAngle.z]) */
+    // put on baseplate for printing
+    translate([(1 + side) * -9.5 - 1, (1 + side) * 19.5 - 3, block.z])
+    rotate([90, 90, 0])
+    rotate([0, 0, side * -switchAngle.z])
 
     /* // flip to folded position (approximate) */
     /* translate([38.5, side * 18, block.z-17]) */
@@ -377,14 +377,14 @@ module thumb(side) {
 module leg(side){
     side = side == "left" ? -1 : 1;
 
-    /* // put on baseplate for printing */
-    /* translate([-22, 0, -block.z - 1.16]) */
-    /* rotate([0, 90, 0]) */
-    /* rotate([0, 0, side * 90]) */
-    /* rotate([0, 90, 0]) */
+    // put on baseplate for printing
+    translate([-22, 0, -block.z - 1.16])
+    rotate([0, 90, 0])
+    rotate([0, 0, side * 90])
+    rotate([0, 90, 0])
 
     /* // flip to folded position (approximate) */
-    /* translate([.55, side * 40.9, 107]) */
+    /* translate([0, side * 40.9, 106.50]) */
     /* rotate([side * -90, 0, 0]) */
 
     // flip the board if on the left side
@@ -409,6 +409,7 @@ module leg(side){
                     translate([0, 0, 6.3]) hinge();
                 }
             }
+
 
         }
 
@@ -844,20 +845,23 @@ translate([0,-1,0]){
 
 // MCU COVER
 
-/* // For printing */
-/* translate([-1, 91, 0]) */
-/* rotate([0, 0, 90]) */
-/*     MCUCover(); */
+// For printing
+translate([-1, 91, 0])
+rotate([0, 0, 90])
+    MCUCover();
 
 /* // Put in place */
 /* translate([2.7, 34.85, block.z*2-MCUCoverSize.z-topThickness]) */
 /*     rotate([180, 0, 180]) */
 /* MCUCover(); */
 
-/* // String clip */
-/* clip(2); */
+// String clip
+clip(2);
 
-/* // Pins for hinges */
-/* // Thumb pins */
-/* translate([23, 0, block.z - 17.7]) cylinder(d=hingeHoleDia-.2, h=17.7, center=false); */
-/* translate([26, 0, block.z - 17.7]) cylinder(d=hingeHoleDia-.2, h=17.7, center=false); */
+// Pins for hinges
+// Thumb pins
+translate([23, 0, block.z - 17.7]) cylinder(d=hingeHoleDia-.2, h=17.7, center=false);
+translate([26, 0, block.z - 17.7]) cylinder(d=hingeHoleDia-.2, h=17.7, center=false);
+// Back leg pins
+translate([29, 0, block.z - 10.4]) cylinder(d=hingeHoleDia-.2, h=10.4, center=false);
+translate([32, 0, block.z - 10.4]) cylinder(d=hingeHoleDia-.2, h=10.4, center=false);
