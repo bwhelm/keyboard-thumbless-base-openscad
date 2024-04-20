@@ -1,6 +1,7 @@
 $fn= $preview ? 32 : 128; // render more accurately than preview
 segments = $preview ? 32 : 512;  // render some curves more accurately still
-FINAL = false;             // Don't render everything when false!
+FINAL = true;             // Don't render everything when false!
+PRINT = true;             // Place all parts on the face plate
 
 switchHoleSide = 14.5;    // size of square hole in mm
 switchClipSide = 13.8;    // size of square hole in mm
@@ -280,12 +281,12 @@ module thumb(side) {
     thumbBlockThickness = 7;
     side = side == "left" ? -1 : 1;
 
-    // put thumb block on baseplate for printing
-    translate([(1 + side) * -9.5 - 1, (1 + side) * 19.5 - 3, block.z])
-    rotate([90, 90, 0])
-    rotate([0, 0, side * -switchAngle.z])
+    /* // put on baseplate for printing */
+    /* translate([(1 + side) * -9.5 - 1, (1 + side) * 19.5 - 3, block.z]) */
+    /* rotate([90, 90, 0]) */
+    /* rotate([0, 0, side * -switchAngle.z]) */
 
-    /* // flip thumb block to folded position (approximate) */
+    /* // flip to folded position (approximate) */
     /* translate([38.5, side * 18, block.z-17]) */
     /* rotate([0, -90, side * switchAngle.z]) */
     /* rotate([0, 0, side * -switchAngle.z]) */
@@ -374,17 +375,63 @@ module thumb(side) {
 }
 
 module leg(side){
-    #difference(){
-    translate([0, 77.16, raiseThumbBlock])
-        cube([11.64, topThickness, block.z - topThickness - raiseThumbBlock]);
+    side = side == "left" ? -1 : 1;
 
-    // SLICE ANGLE OFF BOTTOM OF FEET
-    translate([0, -.05, -10])
-        rotate([0, -sliceAngle, 0])
-        translate([-10, 0, raiseThumbBlock - 10])
-        cube([block.x*2 + .1, block.y + .1, 20], center=false);
+    /* // put on baseplate for printing */
+    /* translate([-22, 0, -block.z - 1.16]) */
+    /* rotate([0, 90, 0]) */
+    /* rotate([0, 0, side * 90]) */
+    /* rotate([0, 90, 0]) */
+
+    /* // flip to folded position (approximate) */
+    /* translate([.55, side * 40.9, 107]) */
+    /* rotate([side * -90, 0, 0]) */
+
+    // flip the board if on the left side
+    mirror([0, -(side - 1) / 2, 0])
+
+    difference(){
+        union(){
+            translate([0, 77.16, -raiseThumbBlock])
+                cube([11.64, topThickness, block.z - topThickness - raiseThumbBlock]);
+
+            // BUMPERS
+            // 2. Inside far bumper: need to build this up
+            // Cylinder for bumper
+            rotate([0, -sliceAngle, 0])
+                translate([bumperDia/2+.3, PCBTopEdge-3.5, 0.643])
+                cylinder(d=bumperDia, h=stringHoleThickness);
+
+            // Hinge
+            translate([.55, block.y - 14, block.z - topThickness - hingeDia/2 - 2*raiseThumbBlock]){
+                rotate([-90, 0, 0]) rotate([0, 90, 0]){
+                    translate([0, 0, 2.1]) hinge();
+                    translate([0, 0, 6.3]) hinge();
+                }
+            }
 
         }
+
+        // Round corner
+        difference() {
+            translate([2.5, PCBOrigin.y - PCBTopEdge - 2.5, block.z/2])
+                cube([5.01, 5.01, block.z+1], center=true);
+            translate([5, PCBOrigin.y - PCBTopEdge - 5, block.z/2])
+                rotate([0, 0, 90])
+                cylinder(h=block.z+2, r=5, center=true);
+        }
+
+        // Hollow out spot for bumper inside cylinder
+        rotate([0, -sliceAngle, 0]) translate([bumperDia/2+.3, PCBTopEdge-3.5, 0.69]) cylinder(d=bumperDia-2, h=2, center=true);
+        // Slice off front edge
+        translate([-bumperDia, PCBTopEdge-bumperDia/2-3, 0])
+            cube([bumperDia, bumperDia, 2*bumperDia]);
+        // Slice off bottom (of sphere)
+        rotate([0, -sliceAngle, 0])
+            translate([0, PCBTopEdge-bumperDia+2.5, -bumperDia+0.65])
+            cube([bumperDia + 1, bumperDia + 1, bumperDia]);
+
+    }
 }
 
 module main(side) {
@@ -405,49 +452,16 @@ module main(side) {
                         translate([0, .6*block.y, block.z - stringHoleThickness / 2])
                             stringConnector();
 
-                        /* // ADD ROTATED THUMB BLOCK */
-                        /* translate([0, thumbDisplacement, -5]) */
-                        /*     rotate(switchAngle) */
-                        /*     cube([keyWidth+10, keyWidth-.06, block.z + 5]); */
-
                     }
 
-                    /* // TOP KEY HOLE */
-                    /* translate([-.05, thumbDisplacement, 0]) */
-                    /*     rotate(switchAngle) */
-                    /*     translate([0, keyWidth/2, block.z - keyFromTop - (keyHeight)/2]) */
-                    /*     keyhole(side); */
-
-                    /* // BOTTOM KEY HOLE */
-                    /* translate([-.05, thumbDisplacement, 0]) */
-                    /*     rotate(switchAngle) */
-                    /*     translate([0, keyWidth/2, keyFromBottom + keyHeight/2]) */
-                    /*     keyhole(side); */
-
-                    // FIXME: Uncomment this!
-                    /* // SLICE OFF BACK EDGE (to height of folded thumb block) */
-                    /* translate([-2, -2, 0]) cube([100, 92, 23]); */
+                    // SLICE OFF BACK EDGE (to height of folded thumb block)
+                    translate([-2, -2, 0]) cube([100, 92, 23]);
 
                     // EXCESS BEHIND KEY HOLE
                     translate([2, thumbDisplacement, 0])
                         rotate(switchAngle)
                         translate([-6, .5, 0])
                         cube([block.x/2, keyWidth, block.z - topThickness]);
-                    /* // Undercut the bumper */
-                    /* translate([2, thumbDisplacement, 0]) */
-                    /*     rotate(switchAngle) */
-                    /*     translate([5.6, 1, 5]) */
-                    /*     cube([block.x/2, keyWidth, block.z - topThickness - 5]); */
-                    /* // Cut between thumb switches and wall */
-                    /* #translate([2, thumbDisplacement, 0]) */
-                    /*     rotate(switchAngle) */
-                    /*     translate([-10, .5, 0]) */
-                    /*     cube([block.x/2, .51, block.z - topThickness]); */
-                    /* // Cut between thumb switches and top */
-                    /* translate([-1, -.5, block.z - topThickness - .5]) */
-                    /*     rotate(switchAngle) */
-                    /*     cube([10, keyWidth+2, .5]); */
-
 
                     // CUT OUT ARCH BEHIND KEYS (EXTRUDING OVAL OF CORRECT SIZE)
                     translate([block.x + archFudge,
@@ -641,19 +655,22 @@ module main(side) {
                                     block.z,
                                     screwDiameter);
                         }
+                        // Cut out gap for MCU Cover
                         translate([107.65 - PCBOrigin.x - MCUCoverSize.x/2,
                                 PCBOrigin.y - 82.70 - 2,
                                 -topThickness]) {
                             cube([MCUCoverSize.x, 8, block.z]);
                         }
-                        // Cut-out for USB-C plug
-                        translate([107.65 - PCBOrigin.x-6.5,
-                                PCBOrigin.y - PCBTopEdge - 15,
-                                block.z - 15.5])
-                            cube([13, 30, 8.5]);
                         // Cut out battery attachment pad
                         translate([114.2 - PCBOrigin.x, PCBOrigin.y - 84.6, block.z])
                             cube([5.5, 4.5, 2.5], center=true);
+                    }
+
+                    // Cut off back leg
+                    translate([107.65 - PCBOrigin.x - 1*MCUCoverSize.x/2 - 15 + .1,
+                            PCBOrigin.y - 82.70 - 2,
+                            -topThickness]) {
+                        cube([15, 8, block.z]);
                     }
 
                     // CUT OUT BUMPERS -- do it here, and then again later
@@ -672,40 +689,41 @@ module main(side) {
 
                 }  // difference
 
-                // BUMPERS
-                // 2. Inside far bumper: need to build this up
-                difference(){
-                    union(){
-                        // Cylinder for bumper
-                        rotate([0, -sliceAngle, 0])
-                            translate([bumperDia/2+.3, PCBTopEdge-3.5, 0.643])
-                            cylinder(d=bumperDia, h=stringHoleThickness);
-                        // Sphere to go on top
-                        rotate([0, -sliceAngle, 0])
-                            translate([bumperDia/2+.35, PCBTopEdge-3.54, stringHoleThickness + 0.0])
-                            rotate([-10, 0, 0])
-                            sphere(d=bumperDia, $fn=128);
-                        // Fill in between sphere and back leg
-                        translate([bumperDia/2 - 1.5, PCBTopEdge-1.3, 6.0])
-                            rotate([90, 0, 0])
-                            cylinder(d=bumperDia, h=2.3);
-                    }
-                    // Hollow out spot for bumper inside cylinder
-                    rotate([0, -sliceAngle, 0]) translate([bumperDia/2+.3, PCBTopEdge-3.5, 0.69]) cylinder(d=bumperDia-2, h=2, center=true);
-                    // Slice off inside corner
-                    translate([-bumperDia/2, PCBTopEdge-1.4, -0.05]) {
-                        cube([bumperDia, bumperDia, 2*bumperDia + .1]);
-                    }
-                    // Slice off front edge
-                    translate([-bumperDia, PCBTopEdge-bumperDia/2-3, 0])
-                        cube([bumperDia, bumperDia, 2*bumperDia]);
-                    // Slice off bottom (of sphere)
-                    rotate([0, -sliceAngle, 0])
-                        translate([0, PCBTopEdge-bumperDia+2.5, -bumperDia+0.65])
-                        cube([bumperDia, bumperDia, bumperDia]);
-                }
+                /* // BUMPERS */
+                /* // 2. Inside far bumper: need to build this up */
+                /* difference(){ */
+                /*     union(){ */
+                /*         // Cylinder for bumper */
+                /*         rotate([0, -sliceAngle, 0]) */
+                /*             translate([bumperDia/2+.3, PCBTopEdge-3.5, 0.643]) */
+                /*             cylinder(d=bumperDia, h=stringHoleThickness); */
+                /*         // Sphere to go on top */
+                /*         rotate([0, -sliceAngle, 0]) */
+                /*             translate([bumperDia/2+.35, PCBTopEdge-3.54, stringHoleThickness + 0.0]) */
+                /*             rotate([-10, 0, 0]) */
+                /*             sphere(d=bumperDia, $fn=128); */
+                /*         // Fill in between sphere and back leg */
+                /*         translate([bumperDia/2 - 1.5, PCBTopEdge-1.3, 6.0]) */
+                /*             rotate([90, 0, 0]) */
+                /*             cylinder(d=bumperDia, h=2.3); */
+                /*     } */
+                /*     // Hollow out spot for bumper inside cylinder */
+                /*     rotate([0, -sliceAngle, 0]) translate([bumperDia/2+.3, PCBTopEdge-3.5, 0.69]) cylinder(d=bumperDia-2, h=2, center=true); */
+                /*     // Slice off inside corner */
+                /*     translate([-bumperDia/2, PCBTopEdge-1.4, -0.05]) { */
+                /*         cube([bumperDia, bumperDia, 2*bumperDia + .1]); */
+                /*     } */
+                /*     // Slice off front edge */
+                /*     translate([-bumperDia, PCBTopEdge-bumperDia/2-3, 0]) */
+                /*         cube([bumperDia, bumperDia, 2*bumperDia]); */
+                /*     // Slice off bottom (of sphere) */
+                /*     rotate([0, -sliceAngle, 0]) */
+                /*         translate([0, PCBTopEdge-bumperDia+2.5, -bumperDia+0.65]) */
+                /*         cube([bumperDia, bumperDia, bumperDia]); */
+                /* } */
 
                 // HINGE PIECES
+                // Thumb block
                 rotate([90, 0, switchAngle.z]){
                     translate([4.3 + hingeDia, block.z - topThickness - hingeDia/2 - raiseThumbBlock, 0]){
                         rotate([0, 0, -90]){
@@ -731,6 +749,15 @@ module main(side) {
 
                 }
 
+                // Back leg
+                translate([.55, block.y - 14, block.z - topThickness - hingeDia/2 - 2*raiseThumbBlock]){
+                    rotate([0, 90, 0]){
+                        translate([0, 0, 0]) hinge();
+                        translate([0, 0, 4.2]) hinge();
+                        translate([0, 0, 8.4]) hinge();
+                    }
+                }
+
             }  // union
 
         }  // translate
@@ -740,7 +767,7 @@ module main(side) {
 
 module clip(clipNumber){  // clipNumber = how many clips to produce
     for (i = [0:clipNumber - 1]) {
-        translate([-clipSlotLength-clipWidth-8, -(clipThickness + 2) * i - 2, block.z - clipWidth]) {
+        translate([-clipSlotLength-clipWidth - 1, -60 -(clipThickness + 2) * i - 2, block.z - clipWidth]) {
             rotate([90, 0, 0]) {
                 difference(){
                     union(){
@@ -802,17 +829,18 @@ module clip(clipNumber){  // clipNumber = how many clips to produce
 
 
 // GENERATE MODEL
-// Right side
+
+/* // Right side */
 main("right");
-/* thumb("right"); */
+thumb("right");
 leg("right");
 
-/* // Left side */
-/* translate([0,-1,0]){ */
-/*     main("left"); */
-/*     thumb("left"); */
-/*     /1* leg("left"); *1/ */
-/* } */
+// Left side
+translate([0,-1,0]){
+    main("left");
+    thumb("left");
+    leg("left");
+}
 
 // MCU COVER
 
@@ -826,10 +854,10 @@ leg("right");
 /*     rotate([180, 0, 180]) */
 /* MCUCover(); */
 
-// String clip
+/* // String clip */
 /* clip(2); */
 
-// Pins for hinges
-// Thumb pins
+/* // Pins for hinges */
+/* // Thumb pins */
 /* translate([23, 0, block.z - 17.7]) cylinder(d=hingeHoleDia-.2, h=17.7, center=false); */
 /* translate([26, 0, block.z - 17.7]) cylinder(d=hingeHoleDia-.2, h=17.7, center=false); */
