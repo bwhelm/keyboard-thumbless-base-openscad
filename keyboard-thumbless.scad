@@ -392,15 +392,21 @@ module leg(side){
 
     difference(){
         union(){
-            translate([0, 77.16, -raiseThumbBlock])
-                cube([11.64, topThickness, block.z - topThickness - raiseThumbBlock]);
+            difference() {
+                translate([0, 77.16, -raiseThumbBlock])
+                    cube([11.64, topThickness, block.z - topThickness - raiseThumbBlock]);
+            }
 
             // BUMPERS
-            // 2. Inside far bumper: need to build this up
             // Cylinder for bumper
-            rotate([0, -sliceAngle, 0])
-                translate([bumperDia/2+.3, PCBTopEdge-3.5, 0.643])
-                cylinder(d=bumperDia, h=stringHoleThickness);
+            rotate([0, -sliceAngle, 0]){
+                translate([bumperDia/2 + 1, PCBTopEdge-3.5, 0.643])
+                    cylinder(d=bumperDia, h=stringHoleThickness);
+                // Fill in around bumper
+                translate([1.12, 74, .643])
+                    rotate([0, 0, 13])
+                    cube ([5, 4, 4]);
+            }
 
             // Hinge
             translate([.55, block.y - 14, block.z - topThickness - hingeDia/2 - 2*raiseThumbBlock]){
@@ -413,17 +419,17 @@ module leg(side){
 
         }
 
-        // Round corner
-        difference() {
-            translate([2.5, PCBOrigin.y - PCBTopEdge - 2.5, block.z/2])
-                cube([5.01, 5.01, block.z+1], center=true);
-            translate([5, PCBOrigin.y - PCBTopEdge - 5, block.z/2])
-                rotate([0, 0, 90])
-                cylinder(h=block.z+2, r=5, center=true);
-        }
+                // Round corner
+                difference() {
+                    translate([2.5, PCBOrigin.y - PCBTopEdge - 2.5, block.z/2])
+                        cube([5.01, 5.01, block.z+1], center=true);
+                    translate([5, PCBOrigin.y - PCBTopEdge - 5, block.z/2])
+                        rotate([0, 0, 90])
+                        cylinder(h=block.z+2, r=5, center=true);
+                }
 
         // Hollow out spot for bumper inside cylinder
-        rotate([0, -sliceAngle, 0]) translate([bumperDia/2+.3, PCBTopEdge-3.5, 0.69]) cylinder(d=bumperDia-2, h=2, center=true);
+        rotate([0, -sliceAngle, 0]) translate([bumperDia/2 + 1, PCBTopEdge-3.5, 0.69]) cylinder(d=bumperDia-2, h=2, center=true);
         // Slice off front edge
         translate([-bumperDia, PCBTopEdge-bumperDia/2-3, 0])
             cube([bumperDia, bumperDia, 2*bumperDia]);
@@ -746,7 +752,7 @@ module main(side) {
                         }
                     }
 
-                // FIXME: Need to add a bump to lock thumbs in place!
+                    // FIXME: Need to add a bump to lock thumbs in place!
 
                 }
 
@@ -831,7 +837,7 @@ module clip(clipNumber){  // clipNumber = how many clips to produce
 
 // GENERATE MODEL
 
-/* // Right side */
+// Right side
 main("right");
 thumb("right");
 leg("right");
