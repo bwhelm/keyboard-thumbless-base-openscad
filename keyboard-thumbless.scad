@@ -285,6 +285,16 @@ module hinge() {
 
 raiseThumbBlock = .2;  // Amount thumb block gets raised by hinge
 
+module wireClip(strands) {
+    strandWidth = 1;
+    wireThickness = 1;
+    union() {
+        cube([wireThickness + 1, 2, 3]);
+        translate([wireThickness + 1, 0, 0]) cube([2, 2 + 1 + strands * strandWidth, 3]);
+        translate([wireThickness, 2 + strands * strandWidth, 0]) cube([1.0, 1, 3]);
+    }
+}
+
 module thumb(side) {
     thumbBlockThickness = 7;
     side = side == "left" ? -1 : 1;
@@ -364,15 +374,24 @@ module thumb(side) {
                 rotate([90, 0, switchAngle.z]){
                     translate([4.3 + hingeDia, block.z - topThickness - hingeDia/2, 0]){
                         // Need to put hinges in different spots to avoid the switch wires
-                        if (side == 1){ // if right side
+                        if (side == 1){  // if right side
                             translate([0, 0,  -2.0]) hinge();
                             translate([0, 0,  -8.0]) hinge();
                             translate([0, 0, -15.6]) hinge();
-                        } else { // if left side
+                        } else {         // if left side
                             translate([0, 0,  -4.1]) hinge();
                             translate([0, 0, -17.7]) hinge();
                             translate([0, 0, -12.0]) hinge();
                         }
+                    }
+                }
+
+                // WIRE CLIP
+                rotate([0, 0, switchAngle.z]){
+                    if (side == 1) {  // if right side
+                        translate([thumbBlockThickness, 6.5, block.z - topThickness - 10]) wireClip(2);
+                    } else {          // if left side
+                        translate([thumbBlockThickness, 5.5, block.z - topThickness - 10]) wireClip(2);
                     }
                 }
 
@@ -800,6 +819,13 @@ module main(side) {
                         cube([10, 4, 10]);
                 }
 
+                // Wire clip
+                rotate([180-switchAngle.z/2, 90, 0])
+                    if (side == 1) {  // if right side
+                        translate([-block.z + topThickness, -16.5, -19]) wireClip(4);
+                    } else {          // if left side
+                        translate([-block.z + topThickness, -16.5, -21.5]) wireClip(4);
+                    }
 
             }  // union
 
@@ -885,16 +911,14 @@ translate([0,-1,0]) {
     leg("left");
 }
 
-// MCU COVER
-
-// For printing
+// MCU COVER -- For printing
 translate([-1, 91, 0]) {
     rotate([0, 0, 90]) {
         MCUCover();
     }
 }
 
-/* // Put in place */
+/* // MCU COVER -- Put in place */
 /* translate([2.7, 34.85, block.z*2-MCUCoverSize.z-topThickness]) { */
 /*     rotate([180, 0, 180]) { */
 /*         MCUCover(); */
