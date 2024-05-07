@@ -286,8 +286,8 @@ module hinge() {
 raiseThumbBlock = .2;  // Amount thumb block gets raised by hinge
 
 module wireClip(strands) {
-    strandWidth = 1;
-    wireThickness = 1;
+    strandWidth = 1.2;
+    wireThickness = 1.0;
     union() {
         cube([wireThickness + 1, 2, 3]);
         translate([wireThickness + 1, 0, 0]) cube([2, 2 + 1 + strands * strandWidth, 3]);
