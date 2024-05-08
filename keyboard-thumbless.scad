@@ -255,9 +255,9 @@ module MCUCover() {
                 /* // Bottom left */
                 /* sunkenScrew(MCUCoverScrewOffset, MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1); */
                 // Top left
-                sunkenScrew(MCUCoverScrewOffset, MCUCoverSize.y - MCUCoverScrewOffset + topThickness, MCUCoverSize.z, standoffDiameter+.1);
+                sunkenScrew(MCUCoverScrewOffset, MCUCoverSize.y - MCUCoverScrewOffset + topThickness, MCUCoverSize.z, standoffDiameter+.3);
                 // Bottom right
-                sunkenScrew(MCUCoverSize.x - MCUCoverScrewOffset, MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1);
+                sunkenScrew(MCUCoverSize.x - MCUCoverScrewOffset, MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.3);
                 /* // Top right: This connects to screw on PCB! */
                 /* sunkenScrew(MCUCoverSize.x - MCUCoverScrewOffset - 2, */
                 /*             MCUCoverSize.y - MCUCoverScrewOffset + topThickness, */
@@ -270,7 +270,8 @@ module MCUCover() {
 }
 
 hingeDia = screwDiameter * 2.5;
-hingeHoleDia = hingeDia / 2.5;
+/* hingeHoleDia = hingeDia / 2.5; */
+hingeHoleDia = 2.3;  // = 13 gauge (size of insulation hanger wire
 hingeThickness = 2;
 module hinge() {
     // Thumb Hinge
@@ -695,7 +696,7 @@ module main(side) {
                             /*               block.z, */
                             /*               screwDiameter); */
                             sunkenScrew(niceNanoSize.x/2 + standoffDiameter/2 + 1,    // top right
-                                    niceNanoSize.y/2 - screwHeadDiameter/2 + .55,
+                                    niceNanoSize.y/2 - screwHeadDiameter/2 + topThickness + .55,
                                     block.z,
                                     screwDiameter);
                         }
