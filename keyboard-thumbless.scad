@@ -744,6 +744,13 @@ module main(side) {
                     translate([100-bumperDia/2-.5, PCBTopEdge-bumperDia-1, 35.0])
                         cylinder(d=bumperDia-2, h=4);
 
+                    // Cut out hole in side wall for access to thumb hinge
+                    rotate([90, 0, switchAngle.z]){
+                        translate([4.3 + hingeDia, block.z - topThickness - hingeDia/2 - raiseThumbBlock, 0]){
+                            cylinder(d=hingeHoleDia, h=hingeThickness*8 + .1, center=true);
+                        }
+                    }
+
                 }  // difference
 
                 /* // BUMPERS */
