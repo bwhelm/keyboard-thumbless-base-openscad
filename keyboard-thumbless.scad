@@ -286,14 +286,14 @@ module hinge() {
     difference(){
         union(){
             cylinder(d=hingeDia, h=hingeThickness);
-            translate([-hingeDia/2 - 1, -hingeDia/2, 0]) cube([hingeDia/2 + 1, hingeDia*1.5, hingeThickness]);
+            translate([-hingeDia/2 - 1, -hingeDia/2, 0]) cube([hingeDia/2 + 1, hingeDia*2, hingeThickness]);
             // Add extra support to base
             cube([hingeDia/4, hingeDia, hingeThickness]);
         }
         // Cut off excess extra support
-        translate([-5, 6.0, -.05])
-            rotate([0, 0, -30])
-                cube([8, 5, hingeThickness+.1]);
+        translate([-5, 8.7, -.05])
+            rotate([0, 0, -45])
+                cube([12, 5, hingeThickness+.1]);
         // Cut hole through hinge
         cylinder(d=hingeHoleDia, h=hingeThickness*2 + .1, center=true);
     }
