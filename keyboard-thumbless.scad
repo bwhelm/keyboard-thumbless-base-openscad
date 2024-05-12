@@ -232,13 +232,13 @@ module MCUCover() {
             // Cut out screws
             translate([0, 0, -MCUCoverSize.z]){
                 /* // Bottom left */
-                /* sunkenScrew(MCUCoverScrewOffset, MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1); */
+                /* sunkenScrew(MCUCoverScrewOffset, MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.3); */
                 // Top left
-                sunkenScrew(MCUCoverScrewOffset, MCUCoverSize.y - MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1);
+                sunkenScrew(MCUCoverScrewOffset, MCUCoverSize.y - MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.3);
                 // Bottom right
-                sunkenScrew(MCUCoverSize.x - MCUCoverScrewOffset, MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1);
+                sunkenScrew(MCUCoverSize.x - MCUCoverScrewOffset, MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.3);
                 /* // Top right */
-                /* sunkenScrew(MCUCoverSize.x - MCUCoverScrewOffset, MCUCoverSize.y - MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.1); */
+                /* sunkenScrew(MCUCoverSize.x - MCUCoverScrewOffset, MCUCoverSize.y - MCUCoverScrewOffset, MCUCoverSize.z, standoffDiameter+.3); */
             }
             // Slice off end (to ensure it fits under main board
             translate([0, MCUCoverSize.y - .2, 0])
@@ -342,7 +342,7 @@ module main(side) {
                         /* translate([108.16 - PCBOrigin.x, PCBOrigin.y - 140.71, block.z - 1]) */
                         /*     cube([10.5, 12, 18], center=true); */
                         translate([108.16 - PCBOrigin.x - side * 1.25, PCBOrigin.y - 140.71, block.z - 1])
-                            cube([8, 12, 18], center=true);
+                            cube([8, 12, 8], center=true);
                         // Cut a "ramp" to make it easier to insert wires into terminal block hole
                         translate([102.81 - PCBOrigin.x - side * 1.25, PCBOrigin.y - 140.71, block.z - 3.8])
                             rotate([0, -20, 0])
@@ -485,8 +485,8 @@ module main(side) {
                         // Cut-out for USB-C plug
                         translate([107.65 - PCBOrigin.x-6.5,
                                    PCBOrigin.y - PCBTopEdge - 15,
-                                   block.z - 15.5])
-                            cube([13, 30, 8.5]);
+                                   block.z - 15.0])
+                            cube([13, 30, 7.5]);
                         // Cut out battery attachment pad
                         translate([114.2 - PCBOrigin.x, PCBOrigin.y - 84.6, block.z])
                             cube([5.5, 4.5, 2.5], center=true);
@@ -516,15 +516,15 @@ module main(side) {
                         rotate([0, -sliceAngle, 0])
                             translate([bumperDia/2+.3, PCBTopEdge-3.5, 0.643])
                             cylinder(d=bumperDia, h=stringHoleThickness);
-                        // Sphere to go on top
-                        rotate([0, -sliceAngle, 0])
-                            translate([bumperDia/2+.35, PCBTopEdge-3.54, stringHoleThickness + 0.0])
-                            rotate([-10, 0, 0])
-                            sphere(d=bumperDia, $fn=128);
-                        // Fill in between sphere and back leg
-                        translate([bumperDia/2 - 1.5, PCBTopEdge-1.3, 6.0])
-                            rotate([90, 0, 0])
-                                cylinder(d=bumperDia, h=2.3);
+                        /* // Sphere to go on top */
+                        /* rotate([0, -sliceAngle, 0]) */
+                        /*     translate([bumperDia/2+.35, PCBTopEdge-3.54, stringHoleThickness + 0.0]) */
+                        /*     rotate([-10, 0, 0]) */
+                        /*     sphere(d=bumperDia, $fn=128); */
+                        /* // Fill in between sphere and back leg */
+                        /* translate([bumperDia/2 - 1.5, PCBTopEdge-1.3, 6.0]) */
+                        /*     rotate([90, 0, 0]) */
+                        /*         cylinder(d=bumperDia, h=2.3); */
                     }
                     // Hollow out spot for bumper inside cylinder
                     rotate([0, -sliceAngle, 0]) translate([bumperDia/2+.3, PCBTopEdge-3.5, 0.69]) cylinder(d=bumperDia-2, h=2, center=true);
@@ -624,4 +624,4 @@ main("right");
 MCUCover();
 
 // String clip
-/* clip(2); */
+clip(2);
