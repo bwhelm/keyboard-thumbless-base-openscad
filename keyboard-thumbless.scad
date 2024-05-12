@@ -242,13 +242,13 @@ module MCUCover() {
                     cylinder(h=1, r=2);
             }
 
+            } // union
+
             // bump for locking folding leg in place
-            translate([MCUCoverSize.x - 1.4,
-                       MCUCoverSize.y + 1.7,
+            translate([MCUCoverSize.x,
+                       MCUCoverSize.y + 1,
                        8])
                 sphere(2);
-
-            } // union
 
             // Cut out interior
             translate([MCUCoverWallThickness, MCUCoverWallThickness + .01, -.01])
@@ -316,7 +316,7 @@ module thumb(side) {
     side = side == "left" ? -1 : 1;
 
     // put on baseplate for printing
-    translate([(1 + side) * -9.5 - 1, (1 + side) * 19.5 - 3, block.z])
+    translate([(1 + side) * -9.5 - 2.2, (1 + side) * 19.5 - 3, block.z])
     rotate([90, 90, 0])
     rotate([0, 0, side * -switchAngle.z])
 
@@ -334,11 +334,6 @@ module thumb(side) {
                     translate([0, 0, -3 - topThickness])
                         rotate(switchAngle)
                         cube([11.8, keyWidth-.06, block.z + 3 + raiseThumbBlock]);
-
-                    // bump for locking folding leg in place
-                    rotate(switchAngle)
-                    translate([4.5, -1.5, block.z - topThickness - 10])
-                        sphere(2);
 
                     // TOP KEY HOLE
                     translate([-.05, 0, 0])
@@ -386,6 +381,11 @@ module thumb(side) {
                         cylinder(d=bumperDia-2, h=2, center=true);
                 } // difference
 
+                // bump for locking folding leg in place
+                rotate(switchAngle)
+                    translate([5.0, .3, block.z - topThickness - 9.8])
+                    sphere(2);
+
                 // HINGE PIECES
                 rotate([90, 0, switchAngle.z]){
                    translate([4.3 + hingeDia, block.z - topThickness - hingeDia/2, 0]){
@@ -421,7 +421,7 @@ module leg(side){
     side = side == "left" ? -1 : 1;
 
     // put on baseplate for printing
-    translate([-22, 0, -block.z - 1.16])
+    translate([-23.4, 0, -block.z - 1.16])
         rotate([0, 90, 0])
         rotate([0, 0, side * 90])
         rotate([0, 90, 0])
@@ -436,8 +436,8 @@ module leg(side){
     difference(){
         union(){
             difference() {
-                translate([0, 77.16, -raiseThumbBlock])
-                    cube([11.64, topThickness, block.z - topThickness + raiseThumbBlock]);
+                translate([0, 76.16, -raiseThumbBlock])
+                    cube([11.64, topThickness + 1, block.z - topThickness + raiseThumbBlock]);
             }
 
             // BUMPERS
@@ -459,14 +459,14 @@ module leg(side){
                 }
             }
 
+            // bump for locking folding leg in place
+            translate([11.64,
+                    78.15,
+                    /* 78.9, */
+                    block.z - topThickness - 10])
+                sphere(2);
 
         }
-
-        // bump for locking folding leg in place
-        translate([13.0,
-                78.9,
-                block.z - topThickness - 8])
-            sphere(2);
 
         // Round corner
         difference() {
@@ -480,12 +480,12 @@ module leg(side){
         // Hollow out spot for bumper inside cylinder
         rotate([0, -sliceAngle, 0]) translate([bumperDia/2 + 1, PCBTopEdge-3.5, 0.69]) cylinder(d=bumperDia-2, h=2, center=true);
         // Slice off front edge
-        translate([-bumperDia, PCBTopEdge-bumperDia/2-3, 0])
+        translate([-bumperDia, PCBTopEdge-bumperDia/2-3, -bumperDia/2])
             cube([bumperDia, bumperDia, 2*bumperDia]);
         // Slice off bottom (of sphere)
         rotate([0, -sliceAngle, 0])
-            translate([0, PCBTopEdge-bumperDia+2.5, -bumperDia+0.65])
-            cube([bumperDia + 1, bumperDia + 1, bumperDia]);
+            translate([-1, PCBTopEdge-bumperDia+1.5, -bumperDia+0.65])
+            cube([bumperDia + 3, bumperDia + 3, bumperDia]);
 
     }
 }
@@ -495,7 +495,7 @@ module main(side) {
     // flip the board if on the left side
     mirror([0, -(side - 1) / 2, 0])
         translate([0, 0, 0]) {
-            union () {
+            union() {
 
                 /* // Pin for thumb hinge */
                 /* translate([24, 1, block.z - 17.7]) cylinder(d=hingeHoleDia-.2, h=17.7, center=false); */
@@ -506,9 +506,9 @@ module main(side) {
                     union() {
 
                         // MAIN BLOCK
-                        cube([block.x, PCBOrigin.y - PCBTopEdge, block.z]);  // Don't go all the way to end
+                        cube([block.x, PCBOrigin.y - PCBTopEdge, block.z]);
                         translate([0, 0, block.z - topThickness])
-                            cube([block.x-4, block.y, topThickness]); // Don't go all the way to end
+                            cube([block.x, block.y, topThickness]);
 
                     }
 
@@ -751,7 +751,29 @@ module main(side) {
                         }
                     }
 
+                    // bump for locking back folding leg in place
+                    if (side == -1) { // Left side only; right side goes on MCU Cover
+                        translate([11.84, 78.15, block.z - topThickness - 10])
+                            sphere(2);
+                    }
+
+                    // bump for locking thumb folding leg in place
+                    rotate(switchAngle)
+                        translate([5.0, 0.1, block.z - topThickness - 10.0])
+                        sphere(2);
+
                 }  // difference
+
+                // bump for locking back folding leg in place
+                if (side == -1) { // Left side only; right side goes on MCU Cover
+                        difference(){
+                        // build up where bump goes on inside wall
+                        translate([11.75, 75.4, block.z - topThickness - 13])
+                        cube([3.15, 1.8, 13.1]);
+                        translate([11.84, 78.15, block.z - topThickness - 10])
+                            sphere(2);
+                            }
+                }
 
                 /* // BUMPERS */
                 /* // 2. Inside far bumper: need to build this up */
@@ -822,26 +844,6 @@ module main(side) {
                         translate([0, 0, 4.2]) hinge();
                         translate([0, 0, 8.4]) hinge();
                     }
-                }
-
-                // bump for locking back folding leg in place
-                if (side == -1) { // Left side only; right side goes on MCU Cover
-                    difference() {
-                        translate([13.1, 78.9, block.z - topThickness - 8])
-                            sphere(2);
-                        // lop off edge part of sphere that sticks out on inside wall
-                        translate([11.5, 76.2, block.z - topThickness - 10])
-                            cube([3, 1, 3]);
-                    }
-                }
-
-                // bump for locking thumb folding leg in place
-                difference() {
-                    rotate(switchAngle)
-                        translate([4.5, -1.6, block.z - topThickness - 10.2])
-                        sphere(2);
-                    translate([1.5, -4, block.z - topThickness - 15])
-                        cube([10, 4, 10]);
                 }
 
                 /* // Wire clip */
