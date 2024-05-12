@@ -182,11 +182,19 @@ module diodeSolderBumps() {  // Holes for bumps from solder joints of diodes
 module stringConnector() {
     difference(){
         union(){
-            cube([stringHolderLength+2*stringHoleRadius + 0, stringHoleRadius*4, stringHoleThickness], center=true);
+            translate([-2, 0, 0])
+            cube([stringHolderLength+stringHoleRadius, stringHoleRadius*8, stringHoleThickness], center=true);
             translate([-stringHolderLength/2 - stringHoleRadius, 0, 0])
                 rotate([0, 0, 90])
                 cylinder(h=stringHoleThickness, r=2*stringHoleRadius, center=true);
         }
+        // cut off angle on sides
+        rotate([0, 0, 24])
+            translate([4, 9.4, 0])
+                cube([stringHoleRadius*8, stringHoleRadius*4, stringHoleThickness + .1], center=true);
+        rotate([0, 0, -24])
+            translate([4, -9.4, 0])
+                cube([stringHoleRadius*8, stringHoleRadius*4, stringHoleThickness + .1], center=true);
         // drill hole for string
         translate([-stringHolderLength/2 - stringHoleRadius, 0, 0])
                 rotate([0, 0, 90])
@@ -278,23 +286,30 @@ module hinge() {
     difference(){
         union(){
             cylinder(d=hingeDia, h=hingeThickness);
-            translate([-hingeDia/2 - 1, -hingeDia/2, 0]) cube([hingeDia/2 + 1, hingeDia, hingeThickness]);
+            translate([-hingeDia/2 - 1, -hingeDia/2, 0]) cube([hingeDia/2 + 1, hingeDia*1.5, hingeThickness]);
+            // Add extra support to base
+            cube([hingeDia/4, hingeDia, hingeThickness]);
         }
+        // Cut off excess extra support
+        translate([-5, 6.0, -.05])
+            rotate([0, 0, -30])
+                cube([8, 5, hingeThickness+.1]);
+        // Cut hole through hinge
         cylinder(d=hingeHoleDia, h=hingeThickness*2 + .1, center=true);
     }
 }
 
 raiseThumbBlock = .2;  // Amount thumb block gets raised by hinge
 
-module wireClip(strands) {
-    strandWidth = 1.2;
-    wireThickness = 1.0;
-    union() {
-        cube([wireThickness + 1, 2, 3]);
-        translate([wireThickness + 1, 0, 0]) cube([2, 2 + 1 + strands * strandWidth, 3]);
-        translate([wireThickness, 2 + strands * strandWidth, 0]) cube([1.0, 1, 3]);
-    }
-}
+/* module wireClip(strands) { */
+/*     strandWidth = 1.2; */
+/*     wireThickness = 1.0; */
+/*     union() { */
+/*         cube([wireThickness + 1, 2, 3]); */
+/*         translate([wireThickness + 1, 0, 0]) cube([2, 2 + 1 + strands * strandWidth, 3]); */
+/*         translate([wireThickness, 2 + strands * strandWidth, 0]) cube([1.0, 1, 3]); */
+/*     } */
+/* } */
 
 module thumb(side) {
     thumbBlockThickness = 7;
@@ -373,28 +388,29 @@ module thumb(side) {
 
                 // HINGE PIECES
                 rotate([90, 0, switchAngle.z]){
-                    translate([4.3 + hingeDia, block.z - topThickness - hingeDia/2, 0]){
+                   translate([4.3 + hingeDia, block.z - topThickness - hingeDia/2, 0]){
+                   rotate([180, 0, 0])
                         // Need to put hinges in different spots to avoid the switch wires
                         if (side == 1){  // if right side
-                            translate([0, 0,  -2.0]) hinge();
-                            translate([0, 0,  -8.0]) hinge();
-                            translate([0, 0, -15.6]) hinge();
+                            translate([0, 0,  0]) hinge();
+                            translate([0, 0,  6.0]) hinge();
+                            translate([0, 0, 13.6]) hinge();
                         } else {         // if left side
-                            translate([0, 0,  -4.1]) hinge();
-                            translate([0, 0, -17.7]) hinge();
-                            translate([0, 0, -12.0]) hinge();
+                            translate([0, 0,  2.1]) hinge();
+                            translate([0, 0, 15.7]) hinge();
+                            translate([0, 0, 10.0]) hinge();
                         }
                     }
                 }
 
-                // WIRE CLIP
-                rotate([0, 0, switchAngle.z]){
-                    if (side == 1) {  // if right side
-                        translate([thumbBlockThickness, 6.5, block.z - topThickness - 10]) wireClip(2);
-                    } else {          // if left side
-                        translate([thumbBlockThickness, 5.5, block.z - topThickness - 10]) wireClip(2);
-                    }
-                }
+                /* // WIRE CLIP */
+                /* rotate([0, 0, switchAngle.z]){ */
+                /*     if (side == 1) {  // if right side */
+                /*         translate([thumbBlockThickness, 6.5, block.z - topThickness - 10]) wireClip(2); */
+                /*     } else {          // if left side */
+                /*         translate([thumbBlockThickness, 5.5, block.z - topThickness - 10]) wireClip(2); */
+                /*     } */
+                /* } */
 
             } // union
         } // translate
@@ -481,10 +497,10 @@ module main(side) {
         translate([0, 0, 0]) {
             union () {
 
-                // Pin for thumb hinge
-                translate([24, 1, block.z - 17.7]) cylinder(d=hingeHoleDia-.2, h=17.7, center=false);
-                // Pin for back leg hinge
-                translate([26.8, 1, block.z - 10.4]) cylinder(d=hingeHoleDia-.2, h=10.4, center=false);
+                /* // Pin for thumb hinge */
+                /* translate([24, 1, block.z - 17.7]) cylinder(d=hingeHoleDia-.2, h=17.7, center=false); */
+                /* // Pin for back leg hinge */
+                /* translate([26.8, 1, block.z - 10.4]) cylinder(d=hingeHoleDia-.2, h=10.4, center=false); */
 
                 difference() {
                     union() {
@@ -493,10 +509,6 @@ module main(side) {
                         cube([block.x, PCBOrigin.y - PCBTopEdge, block.z]);  // Don't go all the way to end
                         translate([0, 0, block.z - topThickness])
                             cube([block.x-4, block.y, topThickness]); // Don't go all the way to end
-
-                        // ADD STRING CONNECTOR
-                        translate([0, .6*block.y, block.z - stringHoleThickness / 2])
-                            stringConnector();
 
                     }
 
@@ -767,6 +779,11 @@ module main(side) {
                 /*         cube([bumperDia, bumperDia, bumperDia]); */
                 /* } */
 
+                // ADD STRING CONNECTOR
+                translate([stringHoleThickness/2, .6*block.y, block.z - stringHoleThickness/1.5])
+                    rotate([0, -90, 0])
+                    stringConnector();
+
                 // HINGE PIECES
                 // Thumb block
                 rotate([90, 0, switchAngle.z]){
@@ -792,8 +809,8 @@ module main(side) {
                 }
 
                 // Back leg
-                translate([.55, block.y - 14, block.z - topThickness - hingeDia/2 - 2*raiseThumbBlock]){
-                    rotate([0, 90, 0]){
+                translate([11, block.y - 14, block.z - topThickness - hingeDia/2 - 2*raiseThumbBlock]){
+                    rotate([0, 90, 180]){
                         translate([0, 0, 0]) hinge();
                         translate([0, 0, 4.2]) hinge();
                         translate([0, 0, 8.4]) hinge();
@@ -820,13 +837,13 @@ module main(side) {
                         cube([10, 4, 10]);
                 }
 
-                // Wire clip
-                rotate([180-switchAngle.z/2, 90, 0])
-                    if (side == 1) {  // if right side
-                        translate([-block.z + topThickness, -16.5, -19]) wireClip(4);
-                    } else {          // if left side
-                        translate([-block.z + topThickness, -16.5, -21.5]) wireClip(4);
-                    }
+                /* // Wire clip */
+                /* rotate([180-switchAngle.z/2, 90, 0]) */
+                /*     if (side == 1) {  // if right side */
+                /*         translate([-block.z + topThickness, -16.5, -19]) wireClip(4); */
+                /*     } else {          // if left side */
+                /*         translate([-block.z + topThickness, -16.5, -21.5]) wireClip(4); */
+                /*     } */
 
             }  // union
 
@@ -905,7 +922,7 @@ main("right");
 thumb("right");
 leg("right");
 
-// LEFT SIDE
+/* // LEFT SIDE */
 translate([0,-1,0]) {
     main("left");
     thumb("left");
