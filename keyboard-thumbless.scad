@@ -184,11 +184,19 @@ module diodeSolderBumps() {  // Holes for bumps from solder joints of diodes
 module stringConnector() {
     difference(){
         union(){
-            cube([stringHolderLength+2*stringHoleRadius + 0, stringHoleRadius*4, stringHoleThickness], center=true);
+            translate([-2, 0, 0])
+            cube([stringHolderLength+stringHoleRadius, stringHoleRadius*8, stringHoleThickness], center=true);
             translate([-stringHolderLength/2 - stringHoleRadius, 0, 0])
                 rotate([0, 0, 90])
                 cylinder(h=stringHoleThickness, r=2*stringHoleRadius, center=true);
         }
+        // cut off angle on sides
+        rotate([0, 0, 24])
+            translate([4, 9.4, 0])
+                cube([stringHoleRadius*8, stringHoleRadius*4, stringHoleThickness + .1], center=true);
+        rotate([0, 0, -24])
+            translate([4, -9.4, 0])
+                cube([stringHoleRadius*8, stringHoleRadius*4, stringHoleThickness + .1], center=true);
         // drill hole for string
         translate([-stringHolderLength/2 - stringHoleRadius, 0, 0])
                 rotate([0, 0, 90])
@@ -260,10 +268,6 @@ module main(side) {
                         cube([block.x, PCBOrigin.y - PCBTopEdge, block.z]);  // Don't go all the way to end
                         translate([0, 0, block.z - topThickness])
                             cube([block.x-4, block.y, topThickness]); // Don't go all the way to end
-
-                        // ADD STRING CONNECTOR
-                        translate([0, .6*block.y, block.z - stringHoleThickness / 2])
-                            stringConnector();
 
                         // ADD ROTATED THUMB BLOCK
                         translate([0, thumbDisplacement, -5])
@@ -507,6 +511,11 @@ module main(side) {
                         cylinder(d=bumperDia-2, h=4);
 
                 }  // difference
+
+                // ADD STRING CONNECTOR
+                translate([stringHoleThickness / 2, .6*block.y, block.z - stringHoleThickness / 1.5])
+                    rotate([0, -90, 0])
+                    stringConnector();
 
                 // BUMPERS
                 // 2. Inside far bumper: need to build this up
