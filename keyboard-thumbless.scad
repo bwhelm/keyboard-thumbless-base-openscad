@@ -393,12 +393,14 @@ module thumb(side) {
                         // Need to put hinges in different spots to avoid the switch wires
                         if (side == 1){  // if right side
                             translate([0, 0,  0]) hinge();
-                            translate([0, 0,  6.0]) hinge();
+                            translate([0, 0,  6.6]) hinge();
+                            translate([0, 0,  5.7]) hinge();
                             translate([0, 0, 13.6]) hinge();
                         } else {         // if left side
                             translate([0, 0,  2.1]) hinge();
-                            translate([0, 0, 15.7]) hinge();
+                            translate([0, 0,  2.9]) hinge();
                             translate([0, 0, 10.0]) hinge();
+                            translate([0, 0, 15.7]) hinge();
                         }
                     }
                 }
@@ -766,13 +768,23 @@ module main(side) {
 
                 // bump for locking back folding leg in place
                 if (side == -1) { // Left side only; right side goes on MCU Cover
-                        difference(){
+                    difference(){
                         // build up where bump goes on inside wall
-                        translate([11.75, 75.4, block.z - topThickness - 13])
-                        cube([3.15, 1.8, 13.1]);
+                        union(){
+                            translate([11.75, 75.4, block.z - topThickness - 13])
+                                cube([3.15, 1.8, 13.1]);
+                            translate([10.75, 69.4, block.z - topThickness - 8])
+                                cube([4.15, 6, 10]);
+                        }
                         translate([11.84, 78.15, block.z - topThickness - 10])
                             sphere(2);
-                            }
+                        translate([-1, 73.7, block.z - topThickness - 3.2])
+                            rotate([0, 90, 0])
+                            cylinder(d=hingeHoleDia, h=17);
+                        translate([12.5, 70.05, block.z - topThickness - 6])
+                            rotate([45, 0, 0])
+                            cube([5, 4, 10], center=true);
+                    }
                 }
 
                 /* // BUMPERS */
@@ -821,6 +833,7 @@ module main(side) {
                             // Need to put hinges in different spots to avoid the switch wires
                             if (side == 1) { // if right side
                                 translate([0, 0, -13.5]) hinge();
+                                translate([0, 0, -12.8]) hinge();
                                 translate([0, 0, -4.1]) hinge();
                                 difference(){
                                     translate([0, 0, -17.7]) hinge();
@@ -829,8 +842,10 @@ module main(side) {
                                         translate([-7, -18.88, -20]) cube([10, 10, 10]);
                                 }
                             } else { // if left side
+                                translate([0, 0,  -1.0]) hinge();
                                 translate([0, 0,  -2.0]) hinge();
-                                translate([0, 0,  -6.2]) hinge();
+                                translate([0, 0,  -7.0]) hinge();
+                                translate([0, 0,  -7.9]) hinge();
                                 translate([0, 0,  -14.1]) hinge();
                             }
                         }
@@ -840,9 +855,11 @@ module main(side) {
                 // Back leg
                 translate([11, block.y - 14, block.z - topThickness - hingeDia/2 - 2*raiseThumbBlock]){
                     rotate([0, 90, 180]){
+                        translate([0, 0, -0.8]) hinge();
                         translate([0, 0, 0]) hinge();
                         translate([0, 0, 4.2]) hinge();
                         translate([0, 0, 8.4]) hinge();
+                        translate([0, 0, 9.0]) hinge();
                     }
                 }
 
