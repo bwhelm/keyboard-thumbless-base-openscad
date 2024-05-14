@@ -21,7 +21,7 @@ screwHeadThickness = 1.1; // thickness of screw head
 screwLength = 6;          // length of screw shaft
 pcbThickness = 1.6;       // thickness of PCB
 nutThickness = 1.3;       // thickness of nut
-nutDiameter = 5.2;        // diameter of nut, point to point (actually 5.0mm)
+nutDiameter = 5.08;        // diameter of nut, point to point (actually 5.0mm)
 standoffDiameter = 3.2;   // diameter of standoff
 //standoffHeight = 6;       // height of standoff
 standoffHeight = 9;       // height needed for MCU under stand
@@ -242,13 +242,13 @@ module MCUCover() {
                     cylinder(h=1, r=2);
             }
 
-            } // union
-
             // bump for locking folding leg in place
-            translate([MCUCoverSize.x,
+            translate([MCUCoverSize.x - 0.14 -.5,  // .5 mm sunk in side
                        MCUCoverSize.y + 1,
                        8])
                 sphere(2);
+
+            } // union
 
             // Cut out interior
             translate([MCUCoverWallThickness, MCUCoverWallThickness + .01, -.01])
@@ -379,12 +379,13 @@ module thumb(side) {
                     // Bumper
                     rotate([0, -sliceAngle, 0]) translate([bumperDia/2-5, bumperDia/2+6.5, .69])
                         cylinder(d=bumperDia-2, h=2, center=true);
-                } // difference
 
                 // bump for locking folding leg in place
                 rotate(switchAngle)
-                    translate([5.0, .3, block.z - topThickness - 9.8])
+                    translate([5.0, .3 - .5, block.z - topThickness - 10]) // moved .5 mm out
                     sphere(2);
+
+                } // difference
 
                 // HINGE PIECES
                 rotate([90, 0, switchAngle.z]){
@@ -428,68 +429,68 @@ module leg(side){
         rotate([0, 0, side * 90])
         rotate([0, 90, 0])
 
-    /* // flip to folded position (approximate) */
-    /* translate([0, side * 40.9, 106.50]) */
-    /*     rotate([side * -90, 0, 0]) */
+        /* // flip to folded position (approximate) */
+        /* translate([0, side * 40.9, 106.50]) */
+        /*     rotate([side * -90, 0, 0]) */
 
-    // flip the board if on the left side
-    mirror([0, -(side - 1) / 2, 0])
+        // flip the board if on the left side
+        mirror([0, -(side - 1) / 2, 0])
 
-    difference(){
-        union(){
-            difference() {
-                translate([0, 76.16, -raiseThumbBlock])
-                    cube([11.64, topThickness + 1, block.z - topThickness + raiseThumbBlock]);
-            }
-
-            // BUMPERS
-            // Cylinder for bumper
-            rotate([0, -sliceAngle, 0]){
-                translate([bumperDia/2 + 1, PCBTopEdge-3.5, 0.643])
-                    cylinder(d=bumperDia, h=stringHoleThickness);
-                // Fill in around bumper
-                translate([1.12, 74, .643])
-                    rotate([0, 0, 13])
-                    cube ([5, 4, 4]);
-            }
-
-            // Hinge
-            translate([.55, block.y - 14, block.z - topThickness - hingeDia/2 - 2*raiseThumbBlock]){
-                rotate([-90, 0, 0]) rotate([0, 90, 0]){
-                    translate([0, 0, 2.1]) hinge();
-                    translate([0, 0, 6.3]) hinge();
+        difference(){
+            union(){
+                difference() {
+                    translate([0, 76.16, -raiseThumbBlock])
+                        cube([11.64, topThickness + 1, block.z - topThickness + raiseThumbBlock]);
                 }
+
+                // BUMPERS
+                // Cylinder for bumper
+                rotate([0, -sliceAngle, 0]){
+                    translate([bumperDia/2 + 1, PCBTopEdge-3.5, 0.643])
+                        cylinder(d=bumperDia, h=stringHoleThickness);
+                    // Fill in around bumper
+                    translate([1.12, 74, .643])
+                        rotate([0, 0, 13])
+                        cube ([5, 4, 4]);
+                }
+
+                // Hinge
+                translate([.55, block.y - 14, block.z - topThickness - hingeDia/2 - 2*raiseThumbBlock]){
+                    rotate([-90, 0, 0]) rotate([0, 90, 0]){
+                        translate([0, 0, 2.1]) hinge();
+                        translate([0, 0, 6.3]) hinge();
+                    }
+                }
+
             }
 
             // bump for locking folding leg in place
-            translate([11.64,
+            translate([11.64 + .5,
                     78.15,
                     /* 78.9, */
-                    block.z - topThickness - 10])
+                    block.z - topThickness - 8])
                 sphere(2);
 
+            // Round corner
+            difference() {
+                translate([2.5, PCBOrigin.y - PCBTopEdge - 2.5, block.z/2])
+                    cube([5.01, 5.01, block.z+1], center=true);
+                translate([5, PCBOrigin.y - PCBTopEdge - 5, block.z/2])
+                    rotate([0, 0, 90])
+                    cylinder(h=block.z+2, r=5, center=true);
+            }
+
+            // Hollow out spot for bumper inside cylinder
+            rotate([0, -sliceAngle, 0]) translate([bumperDia/2 + 1, PCBTopEdge-3.5, 0.69]) cylinder(d=bumperDia-2, h=2, center=true);
+            // Slice off front edge
+            translate([-bumperDia, PCBTopEdge-bumperDia/2-3, -bumperDia/2])
+                cube([bumperDia, bumperDia, 2*bumperDia]);
+            // Slice off bottom (of sphere)
+            rotate([0, -sliceAngle, 0])
+                translate([-1, PCBTopEdge-bumperDia+1.5, -bumperDia+0.65])
+                cube([bumperDia + 3, bumperDia + 3, bumperDia]);
+
         }
-
-        // Round corner
-        difference() {
-            translate([2.5, PCBOrigin.y - PCBTopEdge - 2.5, block.z/2])
-                cube([5.01, 5.01, block.z+1], center=true);
-            translate([5, PCBOrigin.y - PCBTopEdge - 5, block.z/2])
-                rotate([0, 0, 90])
-                cylinder(h=block.z+2, r=5, center=true);
-        }
-
-        // Hollow out spot for bumper inside cylinder
-        rotate([0, -sliceAngle, 0]) translate([bumperDia/2 + 1, PCBTopEdge-3.5, 0.69]) cylinder(d=bumperDia-2, h=2, center=true);
-        // Slice off front edge
-        translate([-bumperDia, PCBTopEdge-bumperDia/2-3, -bumperDia/2])
-            cube([bumperDia, bumperDia, 2*bumperDia]);
-        // Slice off bottom (of sphere)
-        rotate([0, -sliceAngle, 0])
-            translate([-1, PCBTopEdge-bumperDia+1.5, -bumperDia+0.65])
-            cube([bumperDia + 3, bumperDia + 3, bumperDia]);
-
-    }
 }
 
 module main(side) {
@@ -753,20 +754,24 @@ module main(side) {
                         }
                     }
 
-                    // bump for locking back folding leg in place
-                    if (side == -1) { // Left side only; right side goes on MCU Cover
-                        translate([11.84, 78.15, block.z - topThickness - 10])
-                            sphere(2);
-                    }
-
-                    // bump for locking thumb folding leg in place
-                    rotate(switchAngle)
-                        translate([5.0, 0.1, block.z - topThickness - 10.0])
-                        sphere(2);
-
                 }  // difference
 
+                // bump for locking thumb folding leg in place
+                difference(){
+                    rotate(switchAngle)
+                        translate([5.0, -.33 - .5, block.z - topThickness - 10]) // sunk .5 mm into side
+                            sphere(2);
+                    translate([0, -5, block.z - topThickness - 12.5])
+                        cube([10, 5, 5]);
+                }
+
                 // bump for locking back folding leg in place
+                if (side == -1) { // Left side only; right side goes on MCU Cover
+                    translate([11.84 + .5, 78.15, block.z - topThickness - 8])  // sunk .5 mm into side
+                        sphere(2);
+                }
+
+                // Build up support for hinge
                 if (side == -1) { // Left side only; right side goes on MCU Cover
                     difference(){
                         // build up where bump goes on inside wall
@@ -776,11 +781,11 @@ module main(side) {
                             translate([10.75, 69.4, block.z - topThickness - 8])
                                 cube([4.15, 6, 10]);
                         }
-                        translate([11.84, 78.15, block.z - topThickness - 10])
-                            sphere(2);
+                        // Drill hole through hinge
                         translate([-1, 73.7, block.z - topThickness - 3.2])
                             rotate([0, 90, 0])
                             cylinder(d=hingeHoleDia, h=17);
+                        // Cut support on angle to smooth out
                         translate([12.5, 70.05, block.z - topThickness - 6])
                             rotate([45, 0, 0])
                             cube([5, 4, 10], center=true);
@@ -943,6 +948,10 @@ module clip(clipNumber){  // clipNumber = how many clips to produce
 
 // GENERATE MODEL
 
+/* // BEGIN SLICE OFF CHUNK OF MODEL */
+/* difference(){ */
+/*     union(){ */
+
 // RIGHT SIDE
 main("right");
 thumb("right");
@@ -956,8 +965,8 @@ translate([0,-1,0]) {
 }
 
 // MCU COVER -- For printing
-translate([-1, 91, 0]) {
-    rotate([0, 0, 90]) {
+translate([-41, 86, 0]) {
+    rotate([0, 0, 180]) {
         MCUCover();
     }
 }
@@ -969,5 +978,11 @@ translate([-1, 91, 0]) {
 /*     } */
 /* } */
 
-// STRING CLIP
-clip(2);
+/* // STRING CLIP */
+/* clip(2); */
+
+/* // END SLICE OFF CHUNK OF MODEL */
+/* } */
+/* translate([40, -100, 0]) cube([100, 200, 100]); */
+/* translate([0, -90, 0]) cube([100, 62, 100]); */
+/* } */
