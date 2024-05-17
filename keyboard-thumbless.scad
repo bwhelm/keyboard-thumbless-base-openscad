@@ -46,6 +46,10 @@ MCUCoverSize = [niceNanoSize.x + MCUCoverWallThickness * 2,  // dimensions of MC
 MCUCoverScrewOffset = screwHeadDiameter / 2;
 usbHoleSize = [13, 10, 8]; // Size of hole for USB plug
 
+// Locking Bumps
+lockBumpSize = .5;         // how much locking bump projects out
+lockSphereRadius = 2;      // size of sphere for locking bump
+
 // CLIP VARIABLS
 clipThickness = 7.0;       // Thickness of clip in mm
 clipToothDepth = .15;      // thickness of tooth at front of slot
@@ -241,10 +245,10 @@ module MCUCover() {
                 }
 
                 // bump for locking folding leg in place
-                translate([MCUCoverSize.x - 0.14 -.5,  // .5 mm sunk in side
+                translate([MCUCoverSize.x - 0.14 - (lockSphereRadius - lockBumpSize),
                            MCUCoverSize.y + 1,
                            8])
-                    sphere(2);
+                    sphere(lockSphereRadius);
 
             } // union
 
@@ -269,7 +273,8 @@ module MCUCover() {
 }
 
 hingeDia = screwDiameter * 2.5;
-hingeHoleDia = 2.3;  // = 13 gauge (size of insulation hanger wire
+/* hingeHoleDia = 2.3;  // = 13 gauge (size of insulation hanger wire) */
+hingeHoleDia = 1.65;  // = 14 gauge (use copper wire): 1.6277mm
 hingeThickness = 2;
 module hinge() {
     // Thumb Hinge
@@ -318,6 +323,7 @@ module thumb(side) {
         // flip the board if on the left side
         mirror([0, -(side - 1) / 2, 0]){
             translate([0, 0, -raiseThumbBlock]){
+                difference() {
                 union() {
                     difference() {
                         // ADD ROTATED THUMB BLOCK
@@ -369,11 +375,6 @@ module thumb(side) {
                         rotate([0, -sliceAngle, 0]) translate([bumperDia/2-5, bumperDia/2+6.5, .69])
                             cylinder(d=bumperDia-2, h=2, center=true);
 
-                        // bump for locking folding leg in place
-                        rotate(switchAngle)
-                            translate([5.0, .3 - .5, block.z - topThickness - 10]) // moved .5 mm out
-                                sphere(2);
-
                     } // difference
 
                     // HINGE PIECES
@@ -405,6 +406,13 @@ module thumb(side) {
                     /* } */
 
                 } // union
+
+                        // bump for locking folding leg in place
+                        rotate(switchAngle)
+                            translate([5.0, -(lockSphereRadius - lockBumpSize) + .1, block.z - topThickness - 10])
+                                sphere(lockSphereRadius);
+
+                } // difference
             } // translate
         } // mirror
 }
@@ -452,10 +460,10 @@ module leg(side){
             }
 
             // bump for locking folding leg in place
-            translate([11.64 + .5,
+            translate([11.64 + lockSphereRadius - lockBumpSize - .1,
                     78.15,
                     block.z - topThickness - 8])
-                sphere(2);
+                sphere(lockSphereRadius);
 
             // Round corner
             difference() {
@@ -727,15 +735,15 @@ module main(side) {
                 // bump for locking thumb folding leg in place
                 difference(){
                     rotate(switchAngle)
-                        translate([5.0, -.33 - .5, block.z - topThickness - 10]) // sunk .5 mm into side
-                            sphere(2);
+                        translate([5.0, -.33 - (lockSphereRadius - lockBumpSize), block.z - topThickness - 10])
+                            sphere(lockSphereRadius);
                     translate([0, -5, block.z - topThickness - 12.5])
                         cube([10, 5, 5]);
                 }
 
                 // bump for locking back folding leg in place
                 if (side == -1) { // Left side only; right side goes on MCU Cover
-                    translate([11.84 + .5, 78.15, block.z - topThickness - 8])  // sunk .5 mm into side
+                    translate([11.74 + (lockSphereRadius - lockBumpSize), 78.15, block.z - topThickness - 8])
                         sphere(2);
                 }
 
@@ -746,8 +754,8 @@ module main(side) {
                         union(){
                             translate([11.75, 75.4, block.z - topThickness - 13])
                                 cube([3.15, 1.8, 13.1]);
-                            translate([10.75, 69.4, block.z - topThickness - 8])
-                                cube([4.15, 6, 10]);
+                            translate([11.75, 69.4, block.z - topThickness - 8])
+                                cube([3.15, 6, 10]);
                         }
                         // Drill hole through hinge
                         translate([-1, 73.7, block.z - topThickness - 3.2])
@@ -920,8 +928,8 @@ translate([-41, 86, 0]) {
 /*     } */
 /* } */
 
-// STRING CLIP
-clip(2);
+/* // STRING CLIP */
+/* clip(2); */
 
 /* // END SLICE OFF CHUNK OF MODEL */
 /* } */
