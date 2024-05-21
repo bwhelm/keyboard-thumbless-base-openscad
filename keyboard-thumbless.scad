@@ -20,11 +20,10 @@ screwHeadDiameter = 6.3;  // diameter of screw head
 screwHeadThickness = 1.1; // thickness of screw head
 screwLength = 6;          // length of screw shaft
 pcbThickness = 1.6;       // thickness of PCB
-nutThickness = 1.3;       // thickness of nut
-nutDiameter = 5.08;        // diameter of nut, point to point (actually 5.0mm)
+nutThickness = 1.2;       // thickness of nut
+nutDiameter = 5.08;       // diameter of nut, point to point (actually 5.0mm)
 standoffDiameter = 3.2;   // diameter of standoff
-//standoffHeight = 6;       // height of standoff
-standoffHeight = 9;       // height needed for MCU under stand
+standoffHeight = 10;      // height needed for MCU under stand
 
 bumperDia = 12.1;         // Diameter of bumpers + 2.1mm
 
@@ -42,12 +41,12 @@ MCUCoverTopThickness = 1.5;  // thickness of top cover for MCU cover
 MCUCoverWallThickness = 1 + (standoffDiameter + screwHeadDiameter) / 2;
 MCUCoverSize = [niceNanoSize.x + MCUCoverWallThickness * 2,  // dimensions of MCU cover
              niceNanoSize.y + MCUCoverWallThickness + .6,
-             standoffHeight + 1 + MCUCoverTopThickness];
+             standoffHeight + MCUCoverTopThickness];
 MCUCoverScrewOffset = screwHeadDiameter / 2;
 usbHoleSize = [13, 10, 8]; // Size of hole for USB plug
 
 // Locking Bumps
-lockBumpSize = .5;         // how much locking bump projects out
+lockBumpSize = .7;         // how much locking bump projects out
 lockSphereRadius = 2;      // size of sphere for locking bump
 
 // CLIP VARIABLS
@@ -153,11 +152,11 @@ module keyhole(side) {
 module screwHole() {
     rotate([0, 180, 0]){
         // screw shaft
-        translate([0, 0, -15])
-            cylinder(h=10+.01, d=screwDiameter, center=true);
+        translate([0, 0, -17.5])
+            cylinder(h=5+.01, d=screwDiameter, center=true);
         // screw head
-        translate([0, 0, -15 + screwLength - pcbThickness - nutThickness - 1])
-            cylinder(h=10, d=nutDiameter, $fn=6, center=true);
+        translate([0, 0, -17.5 + screwLength - pcbThickness - nutThickness - 1])
+            cylinder(h=5, d=nutDiameter, $fn=6, center=true);
     }
 }
 
@@ -272,9 +271,9 @@ module MCUCover() {
     }
 }
 
-hingeDia = screwDiameter * 2.5;
+hingeDia = 5.5;
 /* hingeHoleDia = 2.3;  // = 13 gauge (size of insulation hanger wire) */
-hingeHoleDia = 1.65;  // = 14 gauge (use copper wire): 1.6277mm
+hingeHoleDia = 1.70;  // = 14 gauge (use copper wire): 1.6277mm
 hingeThickness = 2;
 module hinge() {
     // Thumb Hinge
@@ -352,12 +351,18 @@ module thumb(side) {
 
                         // CUT OUT ARCH BEHIND KEYS (EXTRUDING OVAL OF CORRECT SIZE)
                         translate([block.x + archFudge,
-                                block.y/2,
-                                -1.5 + raiseThumbBlock]) // make sure to leave minimum thickness
+                                    block.y/2,
+                                    -1.5 + raiseThumbBlock]) // make sure to leave minimum thickness
                             rotate([90+archAngle, 90, 0]) // archAngle
                                 linear_extrude(height=2*block.y, center=true)
                                     resize([2*block.z, 2*(block.x - keyMinDepth)])
                                         circle($fn=segments);
+
+                        /* rotate([0, 21, -16]) */
+                        /*     translate([1.2, */
+                        /*                0, */
+                        /*                0]) // make sure to leave minimum thickness */
+                        /*         cube([20, 20, 30]); */
 
                         // CUT OUT RECTANGLE WITH KEYS
                         translate([block.x/2,
@@ -409,7 +414,7 @@ module thumb(side) {
 
                         // bump for locking folding leg in place
                         rotate(switchAngle)
-                            translate([5.0, -(lockSphereRadius - lockBumpSize) + .1, block.z - topThickness - 10])
+                            translate([5.0, - (lockSphereRadius - lockBumpSize) + .05, block.z - topThickness - 10])
                                 sphere(lockSphereRadius);
 
                 } // difference
@@ -460,7 +465,7 @@ module leg(side){
             }
 
             // bump for locking folding leg in place
-            translate([11.64 + lockSphereRadius - lockBumpSize - .1,
+            translate([11.64 + lockSphereRadius - lockBumpSize - .05,
                     78.15,
                     block.z - topThickness - 8])
                 sphere(lockSphereRadius);
@@ -907,12 +912,12 @@ main("right");
 thumb("right");
 leg("right");
 
-// LEFT SIDE
-translate([0,-1,0]) {
-    main("left");
-    thumb("left");
-    leg("left");
-}
+ // LEFT SIDE
+ translate([0,-1,0]) {
+     main("left");
+     thumb("left");
+     leg("left");
+ }
 
 // MCU COVER -- For printing
 translate([-41, 86, 0]) {
@@ -928,8 +933,8 @@ translate([-41, 86, 0]) {
 /*     } */
 /* } */
 
-/* // STRING CLIP */
-/* clip(2); */
+ // STRING CLIP
+ clip(2);
 
 /* // END SLICE OFF CHUNK OF MODEL */
 /* } */
