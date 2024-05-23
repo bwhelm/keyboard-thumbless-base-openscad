@@ -47,7 +47,7 @@ usbHoleSize = [13, 10, 8]; // Size of hole for USB plug
 
 // Locking Bumps
 lockBumpSize = .7;         // how much locking bump projects out
-lockSphereRadius = 2;      // size of sphere for locking bump
+lockBumpRadius = 2;        // size of cylinder for locking bump
 
 // CLIP VARIABLS
 clipThickness = 7.0;       // Thickness of clip in mm
@@ -243,11 +243,25 @@ module MCUCover() {
                         cylinder(h=1, r=2);
                 }
 
-                // bump for locking folding leg in place
-                translate([MCUCoverSize.x - 0.14 - (lockSphereRadius - lockBumpSize),
-                           MCUCoverSize.y + 1,
+                /*// bump for locking folding leg in place*/
+                /*#translate([MCUCoverSize.x - 0.14 - (lockBumpRadius - lockBumpSize),*/
+                /*           MCUCoverSize.y + 1,*/
+                /*           8])*/
+                /*    sphere(lockBumpRadius);*/
+
+                // bump for locking folding leg in place (standing)
+                translate([MCUCoverSize.x - 0.14 - .9,
+                           MCUCoverSize.y + 1 + .55,
                            8])
-                    sphere(lockSphereRadius);
+                rotate([0, 90, 0])
+                    cylinder(r=lockBumpRadius - .1, h=lockBumpSize + .9);
+
+                // bump for locking folding leg in place (folded)
+                translate([MCUCoverSize.x - 0.14 - .9,
+                           MCUCoverSize.y + 1 + .55 - 9.85,
+                           8.19])
+                rotate([0, 90, 0])
+                    cylinder(r=lockBumpRadius - .1, h=lockBumpSize + .9);
 
             } // union
 
@@ -273,7 +287,7 @@ module MCUCover() {
 
 hingeDia = 5.5;
 /* hingeHoleDia = 2.3;  // = 13 gauge (size of insulation hanger wire) */
-hingeHoleDia = 1.70;  // = 14 gauge (use copper wire): 1.6277mm
+hingeHoleDia = 1.7277;  // = 14 gauge (use copper wire): 1.6277mm
 hingeThickness = 2;
 module hinge() {
     // Thumb Hinge
@@ -310,112 +324,124 @@ module thumb(side) {
     side = side == "left" ? -1 : 1;
 
     // put on baseplate for printing
-    translate([(1 + side) * -9.5 - 2.2, (1 + side) * 19.5 - 3, block.z])
-        rotate([90, 90, 0])
+    translate([side * 9.5 - 12, (1 + side) * 19.5 - 3, block.z - 12.52])
+        rotate([90, -90, 0])
         rotate([0, 0, side * -switchAngle.z])
 
-        /* // flip to folded position (approximate) */
-        /* translate([38.5, side * 18, block.z-17]) */
-        /* rotate([0, -90, side * switchAngle.z]) */
-        /* rotate([0, 0, side * -switchAngle.z]) */
+    /*// flip to folded position (approximate)*/
+    /*translate([38.5, side * 18, block.z-17])*/
+    /*    rotate([0, -90, side * switchAngle.z])*/
+    /*    rotate([0, 0, side * -switchAngle.z])*/
 
         // flip the board if on the left side
         mirror([0, -(side - 1) / 2, 0]){
             translate([0, 0, -raiseThumbBlock]){
                 difference() {
-                union() {
-                    difference() {
-                        // ADD ROTATED THUMB BLOCK
-                        translate([0, 0, -3 - topThickness])
-                            rotate(switchAngle)
+                    union() {
+                        difference() {
+                            // ADD ROTATED THUMB BLOCK
+                            translate([0, 0, -3 - topThickness])
+                                rotate(switchAngle)
                                 cube([11.8, keyWidth-.06, block.z + 3 + raiseThumbBlock]);
 
-                        // TOP KEY HOLE
-                        translate([-.05, 0, 0])
-                            rotate(switchAngle)
+                            // TOP KEY HOLE
+                            translate([-.05, 0, 0])
+                                rotate(switchAngle)
                                 translate([0, keyWidth/2, block.z - keyFromTop - (keyHeight)/2])
-                                    keyhole(side);
+                                keyhole(side);
 
-                        // BOTTOM KEY HOLE
-                        translate([-.05, 0, 0])
-                            rotate(switchAngle)
+                            // BOTTOM KEY HOLE
+                            translate([-.05, 0, 0])
+                                rotate(switchAngle)
                                 translate([0, keyWidth/2, keyFromBottom + keyHeight/2])
-                                    keyhole(side);
+                                keyhole(side);
 
-                        // EXCESS BEHIND KEY HOLE
-                        // Undercut the bumper
-                        translate([2, 0, 0])
-                            rotate(switchAngle)
+                            // EXCESS BEHIND KEY HOLE
+                            // Undercut the bumper
+                            translate([2, 0, 0])
+                                rotate(switchAngle)
                                 translate([thumbBlockThickness - 1.81, 0, 5])
-                                    cube([block.x/2, keyWidth+1, block.z - topThickness - 3]);
+                                cube([block.x/2, keyWidth+1, block.z - topThickness - 3]);
 
-                        // CUT OUT ARCH BEHIND KEYS (EXTRUDING OVAL OF CORRECT SIZE)
-                        translate([block.x + archFudge,
+                            // CUT OUT ARCH BEHIND KEYS (EXTRUDING OVAL OF CORRECT SIZE)
+                            translate([block.x + archFudge,
                                     block.y/2,
                                     -1.5 + raiseThumbBlock]) // make sure to leave minimum thickness
-                            rotate([90+archAngle, 90, 0]) // archAngle
+                                rotate([90+archAngle, 90, 0]) // archAngle
                                 linear_extrude(height=2*block.y, center=true)
-                                    resize([2*block.z, 2*(block.x - keyMinDepth)])
-                                        circle($fn=segments);
+                                resize([2*block.z, 2*(block.x - keyMinDepth)])
+                                circle($fn=segments);
 
-                        /* rotate([0, 21, -16]) */
-                        /*     translate([1.2, */
-                        /*                0, */
-                        /*                0]) // make sure to leave minimum thickness */
-                        /*         cube([20, 20, 30]); */
+                            /* rotate([0, 21, -16]) */
+                            /*     translate([1.2, */
+                            /*                0, */
+                            /*                0]) // make sure to leave minimum thickness */
+                            /*         cube([20, 20, 30]); */
 
-                        // CUT OUT RECTANGLE WITH KEYS
-                        translate([block.x/2,
-                                (PCBOrigin.y - PCBTopEdge)/2 + keyWidth/2 - topThickness/2,
-                                block.z/2 - topThickness])
-                            cube([block.x + 10, PCBOrigin.y - PCBTopEdge - keyWidth - topThickness, block.z + 1], center=true);
+                            // CUT OUT RECTANGLE WITH KEYS
+                            translate([block.x/2,
+                                    (PCBOrigin.y - PCBTopEdge)/2 + keyWidth/2 - topThickness/2,
+                                    block.z/2 - topThickness])
+                                cube([block.x + 10, PCBOrigin.y - PCBTopEdge - keyWidth - topThickness, block.z + 1], center=true);
 
-                        // SLICE ANGLE OFF BOTTOM OF FEET
-                        translate([0, -.05, -10])
-                            rotate([0, -sliceAngle, 0])
+                            // SLICE ANGLE OFF BOTTOM OF FEET
+                            translate([0, -.05, -10])
+                                rotate([0, -sliceAngle, 0])
                                 translate([-10, 0, raiseThumbBlock - 10])
-                                    cube([block.x*2 + .1, block.y + .1, 20], center=false);
+                                cube([block.x*2 + .1, block.y + .1, 20], center=false);
 
-                        // Bumper
-                        rotate([0, -sliceAngle, 0]) translate([bumperDia/2-5, bumperDia/2+6.5, .69])
-                            cylinder(d=bumperDia-2, h=2, center=true);
+                            // Bumper
+                            rotate([0, -sliceAngle, 0]) translate([bumperDia/2-5, bumperDia/2+6.5, .69])
+                                cylinder(d=bumperDia-2, h=2, center=true);
 
-                    } // difference
+                        } // difference
 
-                    // HINGE PIECES
-                    rotate([90, 0, switchAngle.z]){
-                        translate([4.3 + hingeDia, block.z - topThickness - hingeDia/2, 0]){
-                            rotate([180, 0, 0])
-                                // Need to put hinges in different spots to avoid the switch wires
-                                if (side == 1){  // if right side
-                                    translate([0, 0,  0]) hinge();
-                                    translate([0, 0,  6.6]) hinge();
-                                    translate([0, 0,  5.7]) hinge();
-                                    translate([0, 0, 13.6]) hinge();
-                                } else {         // if left side
-                                    translate([0, 0,  2.1]) hinge();
-                                    translate([0, 0,  2.9]) hinge();
-                                    translate([0, 0, 10.0]) hinge();
-                                    translate([0, 0, 15.7]) hinge();
-                                }
+                        // HINGE PIECES
+                        rotate([90, 0, switchAngle.z]){
+                            translate([4.3 + hingeDia, block.z - topThickness - hingeDia/2, 0]){
+                                rotate([180, 0, 0])
+                                    // Need to put hinges in different spots to avoid the switch wires
+                                    if (side == 1){  // if right side
+                                        translate([0, 0,  0]) hinge();
+                                        translate([0, 0,  6.6]) hinge();
+                                        translate([0, 0,  5.7]) hinge();
+                                        translate([0, 0, 13.6]) hinge();
+                                    } else {         // if left side
+                                        translate([0, 0,  2.1]) hinge();
+                                        translate([0, 0,  2.9]) hinge();
+                                        translate([0, 0, 10.0]) hinge();
+                                        translate([0, 0, 15.7]) hinge();
+                                    }
+                            }
                         }
-                    }
 
-                    /* // WIRE CLIP */
-                    /* rotate([0, 0, switchAngle.z]){ */
-                    /*     if (side == 1) {  // if right side */
-                    /*         translate([thumbBlockThickness, 6.5, block.z - topThickness - 10]) wireClip(2); */
-                    /*     } else {          // if left side */
-                    /*         translate([thumbBlockThickness, 5.5, block.z - topThickness - 10]) wireClip(2); */
-                    /*     } */
-                    /* } */
+                        /* // WIRE CLIP */
+                        /* rotate([0, 0, switchAngle.z]){ */
+                        /*     if (side == 1) {  // if right side */
+                        /*         translate([thumbBlockThickness, 6.5, block.z - topThickness - 10]) wireClip(2); */
+                        /*     } else {          // if left side */
+                        /*         translate([thumbBlockThickness, 5.5, block.z - topThickness - 10]) wireClip(2); */
+                        /*     } */
+                        /* } */
 
-                } // union
+                    } // union
 
-                        // bump for locking folding leg in place
-                        rotate(switchAngle)
-                            translate([5.0, - (lockSphereRadius - lockBumpSize) + .05, block.z - topThickness - 10])
-                                sphere(lockSphereRadius);
+                    /*// bump for locking folding leg in place*/
+                    /*rotate(switchAngle)*/
+                    /*    translate([5.0, - (lockBumpRadius - lockBumpSize) + .05, block.z - topThickness - 10])*/
+                    /*        sphere(lockBumpRadius);*/
+
+                    // bump for locking folding leg in place
+                    rotate(switchAngle)
+                        translate([5.0, lockBumpSize, block.z - topThickness - 10])
+                        rotate([90, 0, 0])
+                        cylinder(r=lockBumpRadius, h=lockBumpSize + .1);
+
+                    // Cut off corner to avoid lock bump when folded
+                    rotate(switchAngle)
+                        translate([-.1, -.5, 33])
+                        rotate([70, 0, 0])
+                        cube([5, 5, 1]);
 
                 } // difference
             } // translate
@@ -431,9 +457,9 @@ module leg(side){
         rotate([0, 0, side * 90])
         rotate([0, 90, 0])
 
-        /* // flip to folded position (approximate) */
-        /* translate([0, side * 40.9, 106.50]) */
-        /*     rotate([side * -90, 0, 0]) */
+    /*// flip to folded position (approximate)*/
+    /*translate([0, side * 40.9, 106.50])*/
+    /*    rotate([side * -90, 0, 0])*/
 
         // flip the board if on the left side
         mirror([0, -(side - 1) / 2, 0])
@@ -451,7 +477,7 @@ module leg(side){
                     // Fill in around bumper
                     translate([1.12, 74, .643])
                         rotate([0, 0, 13])
-                            cube ([5, 4, 4]);
+                        cube ([5, 4, 4]);
                 }
 
                 // Hinge
@@ -464,11 +490,22 @@ module leg(side){
 
             }
 
+            // Slice off edge of bumper cylinder
+            translate([11.65, 76.16 - 5, 0])
+                cube([1, 10, 10]);
+
+            /*// bump for locking folding leg in place*/
+            /*translate([11.64 + lockBumpRadius - lockBumpSize - .05,*/
+            /*        78.15,*/
+            /*        block.z - topThickness - 8])*/
+            /*    sphere(lockBumpRadius);*/
+
             // bump for locking folding leg in place
-            translate([11.64 + lockSphereRadius - lockBumpSize - .05,
-                    78.15,
+            translate([11.64 - lockBumpSize,
+                    78.15 + .55,
                     block.z - topThickness - 8])
-                sphere(lockSphereRadius);
+                rotate([0, 90, 0])
+                cylinder(r=lockBumpRadius, h=lockBumpSize + .1);
 
             // Round corner
             difference() {
@@ -476,7 +513,7 @@ module leg(side){
                     cube([5.01, 5.01, block.z+1], center=true);
                 translate([5, PCBOrigin.y - PCBTopEdge - 5, block.z/2])
                     rotate([0, 0, 90])
-                        cylinder(h=block.z+2, r=5, center=true);
+                    cylinder(h=block.z+2, r=5, center=true);
             }
 
             // Hollow out spot for bumper inside cylinder
@@ -487,7 +524,13 @@ module leg(side){
             // Slice off bottom (of sphere)
             rotate([0, -sliceAngle, 0])
                 translate([-1, PCBTopEdge-bumperDia+1.5, -bumperDia+0.65])
-                    cube([bumperDia + 3, bumperDia + 3, bumperDia]);
+                cube([bumperDia + 3, bumperDia + 3, bumperDia]);
+
+            // Cut off corner to avoid lock bump when folded
+                /*#translate([-.1, -.5, 33])*/
+            translate([11.65 - 1.3, 76.16 - .5, 37])
+                rotate([0, 70, 0])
+                cube([5, 6, 1]);
 
         }
 }
@@ -520,17 +563,17 @@ module main(side) {
                     // EXCESS BEHIND KEY HOLE
                     translate([2, 0, 0])
                         rotate(switchAngle)
-                            translate([-6, .5, 0])
-                                cube([block.x/2, keyWidth, block.z - topThickness]);
+                        translate([-6, .5, 0])
+                        cube([block.x/2, keyWidth, block.z - topThickness]);
 
                     // CUT OUT ARCH BEHIND KEYS (EXTRUDING OVAL OF CORRECT SIZE)
                     translate([block.x + archFudge,
                             block.y/2,
                             -1.5]) // make sure to leave minimum thickness
                         rotate([90+archAngle, 90, 0]) // archAngle
-                            linear_extrude(height=2*block.y, center=true)
-                                resize([2*block.z, 2*(block.x - keyMinDepth)])
-                                    circle($fn=segments);
+                        linear_extrude(height=2*block.y, center=true)
+                        resize([2*block.z, 2*(block.x - keyMinDepth)])
+                        circle($fn=segments);
 
                     // CUT OUT RECTANGLE WITH KEYS
                     translate([block.x/2,
@@ -541,8 +584,8 @@ module main(side) {
                     // SLICE ANGLE OFF BOTTOM OF FEET
                     translate([0, -.05, -10])
                         rotate([0, -sliceAngle, 0])
-                            translate([-10, 0, 0])
-                                cube([block.x*2 + .1, block.y + .1, 10], center=false);
+                        translate([-10, 0, 0])
+                        cube([block.x*2 + .1, block.y + .1, 10], center=false);
 
                     // ADD HOLES FOR SOLDER BUMPS
                     // Key switches
@@ -550,7 +593,7 @@ module main(side) {
                         for (location = keys) {
                             translate([(location.x - PCBOrigin.x), PCBOrigin.y - location.y, block.z])
                                 rotate([0, 0, location[2]])
-                                    keySolderBumps();
+                                keySolderBumps();
                         }
                     }
                     // Diodes
@@ -558,7 +601,7 @@ module main(side) {
                         for (location = diodes) {
                             translate([(location.x - PCBOrigin.x), PCBOrigin.y - location.y, block.z])
                                 rotate([0, 0, location[2]])
-                                    diodeSolderBumps();
+                                diodeSolderBumps();
                         }
                     }
                     // Screw holes
@@ -566,7 +609,7 @@ module main(side) {
                         for (location = screws) {
                             translate([(location.x - PCBOrigin.x), PCBOrigin.y - location.y, block.z/2])
                                 rotate([0, 0, location[2]])
-                                    screwHole();
+                                screwHole();
                         }
                     }
                     // Terminal block holes
@@ -577,7 +620,7 @@ module main(side) {
                         // Cut a "ramp" to make it easier to insert wires into terminal block hole
                         translate([102.81 - PCBOrigin.x - side * 1.25, PCBOrigin.y - 140.71, block.z - 3.8])
                             rotate([0, -20, 0])
-                                cube([10, 12, 3.01], center=true);
+                            cube([10, 12, 3.01], center=true);
                     }
 
                     // CUT OUT LOCATIONS OF OTHER SURFACE COMPONENTS
@@ -586,7 +629,7 @@ module main(side) {
                         if (side == 1) {   // Switch goes on right side only
                             translate([145.61 - PCBOrigin.x, PCBOrigin.y - 80.0, block.z])
                                 rotate([0, 0, 167])
-                                    cube([11, 5, 2.5], center=true);
+                                cube([11, 5, 2.5], center=true);
                         }
                         // reset button
                         if (side == 1) {   // On right side, leave gap for solder bumps
@@ -609,21 +652,21 @@ module main(side) {
                             cube([5.01, 5.01, block.z+1], center=true);
                         translate([5, PCBOrigin.y - PCBTopEdge - 5, block.z/2])
                             rotate([0, 0, 90])
-                                cylinder(h=block.z+2, r=5, center=true);
+                            cylinder(h=block.z+2, r=5, center=true);
                     }
                     // Top left edge
                     translate([-.1, PCBOrigin.y - PCBTopEdge, -.1])
                         cube([116.58 - PCBOrigin.x, 25, block.z+1], center=false);
                     translate([116.58 - PCBOrigin.x, PCBOrigin.y - PCBTopEdge + 5, block.z/2])
                         rotate([0, 0, 90])
-                            cylinder(h=block.z+2, r=5, center=true);
+                        cylinder(h=block.z+2, r=5, center=true);
                     // Transition to top arc
                     difference() {
                         translate([125.98 - PCBOrigin.x - 5, PCBOrigin.y - 77.07 + 1, -.5])
                             cube([5.1, 4.1, block.z+1], center=false);
                         translate([125.90 - PCBOrigin.x, PCBOrigin.y - 77.00, block.z/2])
                             rotate([0, 0, 90])
-                                cylinder(h=block.z+2, r=5, center=true);
+                            cylinder(h=block.z+2, r=5, center=true);
                     }
                     // Bottom left corner
                     rotate(switchAngle)
@@ -632,7 +675,7 @@ module main(side) {
                                 cube([2.01, 2.01, block.z+1], center=true);
                             translate([1.95, 2.05 - 2*sin(switchAngle.z), block.z/2])
                                 rotate([0, 0, 90])
-                                    cylinder(h=block.z+2, r=2, center=true);
+                                cylinder(h=block.z+2, r=2, center=true);
                         }
                     // Top right arc
                     // r=89.27 x=126.72 y=161.34
@@ -642,7 +685,7 @@ module main(side) {
                             cube([55, 28, block.z+1], center=false);
                         translate([126.72 - PCBOrigin.x, PCBOrigin.y - 161.34, block.z/2])
                             rotate([0, 0, 90])
-                                cylinder(h=block.z+2, r=89.27, $fn=segments, center=true);
+                            cylinder(h=block.z+2, r=89.27, $fn=segments, center=true);
                     }
                     // Bottom arc
                     translate([141.1 - PCBOrigin.x, PCBOrigin.y - 203.9, block.z/2])
@@ -654,7 +697,7 @@ module main(side) {
                             cube([5, 5, block.z+1], center=false);
                         translate([176.03 - PCBOrigin.x, PCBOrigin.y - 93.02, block.z/2])
                             rotate([0, 0, 90])
-                                cylinder(h=block.z+2, r=5, center=true);
+                            cylinder(h=block.z+2, r=5, center=true);
                     }
                     // Transition to bottom arc on left
                     difference() {
@@ -662,7 +705,7 @@ module main(side) {
                             cube([5.2, 0.9, block.z+1], center=false);
                         translate([100.04 - PCBOrigin.x, PCBOrigin.y - 156.96, block.z/2])
                             rotate([0, 0, 90])
-                                cylinder(h=block.z+2, r=2.86, center=true);
+                            cylinder(h=block.z+2, r=2.86, center=true);
                     }
                     // Bottom right flat part
                     translate([176 - PCBOrigin.x, PCBOrigin.y - 150.2 - 10, block.z/2])
@@ -673,7 +716,7 @@ module main(side) {
                             cube([5.2, 1.0, block.z+1], center=false);
                         translate([168.08 - PCBOrigin.x, PCBOrigin.y - 145.11, block.z/2])
                             rotate([0, 0, 90])
-                                cylinder(h=block.z+2, r=5.1, center=true);
+                            cylinder(h=block.z+2, r=5.1, center=true);
                     }
                     // Bottom right corner
                     difference() {
@@ -681,7 +724,7 @@ module main(side) {
                             cube([5.1, 5.1, block.z+1], center=false);
                         translate([100 - 5, PCBOrigin.y - 145.2, block.z/2])
                             rotate([0, 0, 90])
-                                cylinder(h=block.z+2, r=5, center=true);
+                            cylinder(h=block.z+2, r=5, center=true);
                     }
 
                     // CUT-OUT FOR NICENANO
@@ -690,22 +733,22 @@ module main(side) {
                                 PCBOrigin.y - 82.70 - 1,
                                 block.z/2+24])
                             rotate([180, 0, 0])
-                                cube([niceNanoSize.x, niceNanoSize.y - 1, 18], center=false);
+                            cube([niceNanoSize.x, niceNanoSize.y - 1, 18], center=false);
                         // screws
                         translate([107.65 - PCBOrigin.x, PCBOrigin.y - 103.13 + 2, -block.z]) {
                             sunkenScrew(-niceNanoSize.x/2 - standoffDiameter/2 - 1,    // bottom left
-                                        -niceNanoSize.y/2 - standoffDiameter/2 - 1,
-                                        block.z,
-                                        screwDiameter);
+                                    -niceNanoSize.y/2 - standoffDiameter/2 - 1,
+                                    block.z,
+                                    screwDiameter);
                             sunkenScrew(niceNanoSize.x/2 + standoffDiameter/2 + 1,    // top right
-                                        niceNanoSize.y/2 - screwHeadDiameter/2 + topThickness + .55,
-                                        block.z,
-                                        screwDiameter);
+                                    niceNanoSize.y/2 - screwHeadDiameter/2 + topThickness + .55,
+                                    block.z,
+                                    screwDiameter);
                         }
                         // Cut out gap for MCU Cover
                         translate([107.65 - PCBOrigin.x - MCUCoverSize.x/2,
-                                   PCBOrigin.y - 82.70 - 2,
-                                   -topThickness]) {
+                                PCBOrigin.y - 82.70 - 2,
+                                -topThickness]) {
                             cube([MCUCoverSize.x, 8, block.z]);
                         }
                         // Cut out battery attachment pad
@@ -715,8 +758,8 @@ module main(side) {
 
                     // Cut off back leg
                     translate([107.65 - PCBOrigin.x - 1*MCUCoverSize.x/2 - 15 + .1,
-                               PCBOrigin.y - 82.70 - 2,
-                               -topThickness]) {
+                            PCBOrigin.y - 82.70 - 2,
+                            -topThickness]) {
                         cube([15, 8, block.z]);
                     }
 
@@ -737,19 +780,40 @@ module main(side) {
 
                 }  // difference
 
-                // bump for locking thumb folding leg in place
-                difference(){
-                    rotate(switchAngle)
-                        translate([5.0, -.33 - (lockSphereRadius - lockBumpSize), block.z - topThickness - 10])
-                            sphere(lockSphereRadius);
-                    translate([0, -5, block.z - topThickness - 12.5])
-                        cube([10, 5, 5]);
-                }
+                /*// bump for locking thumb folding leg in place*/
+                /*difference(){*/
+                /*    rotate(switchAngle)*/
+                /*        translate([5.0, -.33 - (lockBumpRadius - lockBumpSize), block.z - topThickness - 10])*/
+                /*            sphere(lockBumpRadius);*/
+                /*    translate([0, -5, block.z - topThickness - 12.5])*/
+                /*        cube([10, 5, 5]);*/
+                /*}*/
 
-                // bump for locking back folding leg in place
+                // bump for locking thumb folding leg in place (upright)
+                rotate(switchAngle)
+                    translate([5.0, -.33 + lockBumpSize, block.z - topThickness - 10])
+                    rotate([90, 0, 0])
+                    cylinder(r=lockBumpRadius - .1, h=lockBumpSize + 1);
+
+                // bump for locking thumb folding leg in place (folded)
+                rotate(switchAngle)
+                    translate([16.75,
+                            -.33 + lockBumpSize,
+                            block.z - topThickness - 7.97])
+                    rotate([90, 0, 0])
+                    cylinder(r=lockBumpRadius - .1, h=lockBumpSize + 1);
+
+                /*// bump for locking back folding leg in place*/
+                /*if (side == -1) { // Left side only; right side goes on MCU Cover*/
+                /*    translate([11.74 + (lockBumpRadius - lockBumpSize), 78.15, block.z - topThickness - 8])*/
+                /*        sphere(2);*/
+                /*}*/
+
+                // bump for locking back folding leg in place (standing)
                 if (side == -1) { // Left side only; right side goes on MCU Cover
-                    translate([11.74 + (lockSphereRadius - lockBumpSize), 78.15, block.z - topThickness - 8])
-                        sphere(2);
+                    translate([11.74 - lockBumpSize, 78.15 + .55, block.z - topThickness - 8])
+                        rotate([0, 90, 0])
+                        cylinder(r=lockBumpRadius - .1, h=lockBumpSize + 1);
                 }
 
                 // Build up support for hinge
@@ -759,25 +823,29 @@ module main(side) {
                         union(){
                             translate([11.75, 75.4, block.z - topThickness - 13])
                                 cube([3.15, 1.8, 13.1]);
-                            translate([11.75, 69.4, block.z - topThickness - 8])
-                                cube([3.15, 6, 10]);
+                            translate([11.75, 65.4, block.z - topThickness - 10.7])
+                                cube([3.15, 11, 12]);
+                        // bump for locking back folding leg in place (folded)
+                        translate([11.06, 68.9, block.z - topThickness - 8.2])
+                            rotate([0, 90, 0])
+                            cylinder(r=lockBumpRadius - .1, h=lockBumpSize);
                         }
                         // Drill hole through hinge
                         translate([-1, 73.7, block.z - topThickness - 3.2])
                             rotate([0, 90, 0])
-                                cylinder(d=hingeHoleDia, h=17);
+                            cylinder(d=hingeHoleDia, h=17);
                         // Cut support on angle to smooth out
-                        translate([12.5, 70.05, block.z - topThickness - 6])
+                        translate([12.5, 65, block.z - topThickness - 10])
                             rotate([45, 0, 0])
-                                cube([5, 4, 10], center=true);
+                            cube([5, 4, 10], center=true);
                     }
                 }
 
                 // Add bump to make USB hole the right size (on right side only)
                 if  (side == 1) {
                     translate([109.55 - PCBOrigin.x - 1*(MCUCoverSize.x - usbHoleSize.x)/2,
-                               PCBOrigin.y - 82.63,
-                               block.z - topThickness - (9.99 - usbHoleSize.z)]) {
+                            PCBOrigin.y - 82.63,
+                            block.z - topThickness - (9.99 - usbHoleSize.z)]) {
                         cube([usbHoleSize.x-.1, topThickness, 1 + 9.99 - usbHoleSize.z]);
                     }
                 }
@@ -785,7 +853,7 @@ module main(side) {
                 // ADD STRING CONNECTOR
                 translate([stringHoleThickness/2, .6*block.y, block.z - stringHoleThickness/1.5])
                     rotate([0, -90, 0])
-                        stringConnector();
+                    stringConnector();
 
                 // HINGE PIECES
                 // Thumb block
@@ -852,10 +920,10 @@ module clip(clipNumber){  // clipNumber = how many clips to produce
                                     cube([clipSlotLength-clipTipLength + clipSlotGap + stringHoleRadius, clipWidth, clipThickness], center=false);
                                 translate([clipTipLength, clipWidth, (clipThickness + clipSlotDepth)/2])  // add front angle
                                     rotate([0,-clipTipAngle,180])
-                                        cube([clipTipLength, clipWidth, (clipThickness-clipSlotDepth)/2]);
+                                    cube([clipTipLength, clipWidth, (clipThickness-clipSlotDepth)/2]);
                                 translate([clipTipLength, 0, (clipThickness - clipSlotDepth)/2])  // add front angle
                                     rotate([180,clipTipAngle,180])
-                                        cube([clipTipLength, clipWidth, (clipThickness-clipSlotDepth)/2]);
+                                    cube([clipTipLength, clipWidth, (clipThickness-clipSlotDepth)/2]);
                                 translate([clipSlotLength + stringHoleRadius + clipSlotGap, clipWidth/2, 0])
                                     cylinder(h=clipThickness, r=clipWidth/2, center=false);                              // string end
                             }
@@ -885,12 +953,12 @@ module clip(clipNumber){  // clipNumber = how many clips to produce
 
                         // Add ridge on top and bottom
                         translate([clipTipLength - stringHoleRadius*3/2 - clipSlotGap/3.4,
-                                   clipRidgeWidth,
-                                   clipThickness])  // ridge on top
+                                clipRidgeWidth,
+                                clipThickness])  // ridge on top
                             cube([clipSlotLength, clipRidgeWidth, clipRidgeHeight], center=false);
                         translate([clipTipLength - stringHoleRadius*3/2 - clipSlotGap/3.4,
-                                   clipRidgeWidth,
-                                   -clipRidgeHeight])  // ridge on bottom
+                                clipRidgeWidth,
+                                -clipRidgeHeight])  // ridge on bottom
                             cube([clipSlotLength, clipRidgeWidth, clipRidgeHeight], center=false);
 
                     }
@@ -912,12 +980,12 @@ main("right");
 thumb("right");
 leg("right");
 
- // LEFT SIDE
- translate([0,-1,0]) {
-     main("left");
-     thumb("left");
-     leg("left");
- }
+// LEFT SIDE
+translate([0,-1,0]) {
+    main("left");
+    thumb("left");
+    leg("left");
+}
 
 // MCU COVER -- For printing
 translate([-41, 86, 0]) {
@@ -926,15 +994,15 @@ translate([-41, 86, 0]) {
     }
 }
 
-/* // MCU COVER -- Put in place */
-/* translate([2.7, 34.85, block.z*2-MCUCoverSize.z-topThickness]) { */
-/*     rotate([180, 0, 180]) { */
-/*         MCUCover(); */
-/*     } */
-/* } */
+/*// MCU COVER -- Put in place*/
+/*translate([2.7, 34.85, block.z*2-MCUCoverSize.z-topThickness]) {*/
+/* rotate([180, 0, 180]) {*/
+/*     MCUCover();*/
+/* }*/
+/*}*/
 
- // STRING CLIP
- clip(2);
+// STRING CLIP
+clip(2);
 
 /* // END SLICE OFF CHUNK OF MODEL */
 /* } */
