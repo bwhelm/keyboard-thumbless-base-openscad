@@ -243,12 +243,6 @@ module MCUCover() {
                         cylinder(h=1, r=2);
                 }
 
-                /*// bump for locking folding leg in place*/
-                /*#translate([MCUCoverSize.x - 0.14 - (lockBumpRadius - lockBumpSize),*/
-                /*           MCUCoverSize.y + 1,*/
-                /*           8])*/
-                /*    sphere(lockBumpRadius);*/
-
                 // bump for locking folding leg in place (standing)
                 translate([MCUCoverSize.x - 0.14 - .9,
                            MCUCoverSize.y + 1 + .55,
@@ -288,8 +282,7 @@ module MCUCover() {
 hingeDia = 5.5;
 /* hingeHoleDia = 2.3;  // = 13 gauge (size of insulation hanger wire) */
 hingeHoleDia = 1.7277;  // = 14 gauge (use copper wire): 1.6277mm
-hingeThickness = 2;
-module hinge() {
+module hinge(hingeThickness) {
     // Thumb Hinge
     difference(){
         union(){
@@ -329,7 +322,7 @@ module thumb(side) {
         rotate([0, 0, side * -switchAngle.z])
 
     /*// flip to folded position (approximate)*/
-    /*translate([38.5, side * 18, block.z-17])*/
+    /*translate([38.5, side * 18.8, block.z-16.8])*/
     /*    rotate([0, -90, side * switchAngle.z])*/
     /*    rotate([0, 0, side * -switchAngle.z])*/
 
@@ -402,15 +395,13 @@ module thumb(side) {
                                 rotate([180, 0, 0])
                                     // Need to put hinges in different spots to avoid the switch wires
                                     if (side == 1){  // if right side
-                                        translate([0, 0,  0]) hinge();
-                                        translate([0, 0,  6.6]) hinge();
-                                        translate([0, 0,  5.7]) hinge();
-                                        translate([0, 0, 13.6]) hinge();
+                                        translate([0, 0,  0]) hinge(2);
+                                        translate([0, 0,  5.7]) hinge(2.9);
+                                        translate([0, 0, 13.6]) hinge(2);
                                     } else {         // if left side
-                                        translate([0, 0,  2.1]) hinge();
-                                        translate([0, 0,  2.9]) hinge();
-                                        translate([0, 0, 10.0]) hinge();
-                                        translate([0, 0, 15.7]) hinge();
+                                        translate([0, 0,  2.1]) hinge(2.8);
+                                        translate([0, 0, 10.0]) hinge(2);
+                                        translate([0, 0, 15.7]) hinge(2);
                                     }
                             }
                         }
@@ -426,14 +417,9 @@ module thumb(side) {
 
                     } // union
 
-                    /*// bump for locking folding leg in place*/
-                    /*rotate(switchAngle)*/
-                    /*    translate([5.0, - (lockBumpRadius - lockBumpSize) + .05, block.z - topThickness - 10])*/
-                    /*        sphere(lockBumpRadius);*/
-
                     // bump for locking folding leg in place
                     rotate(switchAngle)
-                        translate([5.0, lockBumpSize, block.z - topThickness - 10])
+                        translate([4.0, lockBumpSize, block.z - topThickness - 10])
                         rotate([90, 0, 0])
                         cylinder(r=lockBumpRadius, h=lockBumpSize + .1);
 
@@ -442,6 +428,23 @@ module thumb(side) {
                         translate([-.1, -.5, 33])
                         rotate([70, 0, 0])
                         cube([5, 5, 1]);
+
+                    // Make mark identifying side
+                    rotate(switchAngle)
+                    rotate([0, 90, 0])
+                    if (side == 1) {
+                        rotate([0, 0, 90])
+                            translate([2, 18, 6.5])
+                            linear_extrude(height=0.6)
+                            text("R", size=7);
+                    }
+                    else {
+                        rotate([0, 180, 90])
+                            translate([-17, 18, -7.1])
+                            linear_extrude(height=0.6)
+                            text("L", size=7);
+                    }
+
 
                 } // difference
             } // translate
@@ -483,8 +486,8 @@ module leg(side){
                 // Hinge
                 translate([.55, block.y - 14, block.z - topThickness - hingeDia/2 - 2*raiseThumbBlock]){
                     rotate([-90, 0, 0]) rotate([0, 90, 0]){
-                        translate([0, 0, 2.1]) hinge();
-                        translate([0, 0, 6.3]) hinge();
+                        translate([0, 0, 2.1]) hinge(2);
+                        translate([0, 0, 6.3]) hinge(2);
                     }
                 }
 
@@ -493,12 +496,6 @@ module leg(side){
             // Slice off edge of bumper cylinder
             translate([11.65, 76.16 - 5, 0])
                 cube([1, 10, 10]);
-
-            /*// bump for locking folding leg in place*/
-            /*translate([11.64 + lockBumpRadius - lockBumpSize - .05,*/
-            /*        78.15,*/
-            /*        block.z - topThickness - 8])*/
-            /*    sphere(lockBumpRadius);*/
 
             // bump for locking folding leg in place
             translate([11.64 - lockBumpSize,
@@ -527,7 +524,6 @@ module leg(side){
                 cube([bumperDia + 3, bumperDia + 3, bumperDia]);
 
             // Cut off corner to avoid lock bump when folded
-                /*#translate([-.1, -.5, 33])*/
             translate([11.65 - 1.3, 76.16 - .5, 37])
                 rotate([0, 70, 0])
                 cube([5, 6, 1]);
@@ -542,11 +538,6 @@ module main(side) {
         translate([0, 0, 0]) {
             union() {
 
-                /* // Pin for thumb hinge */
-                /* translate([24, 1, block.z - 17.7]) cylinder(d=hingeHoleDia-.2, h=17.7, center=false); */
-                /* // Pin for back leg hinge */
-                /* translate([26.8, 1, block.z - 10.4]) cylinder(d=hingeHoleDia-.2, h=10.4, center=false); */
-
                 difference() {
                     union() {
 
@@ -558,7 +549,7 @@ module main(side) {
                     }
 
                     // SLICE OFF BACK EDGE (to height of folded thumb block)
-                    translate([-2, -2, 0]) cube([100, 92, 23]);
+                    translate([-2, -2, .2]) cube([100, 92, 23]);
 
                     // EXCESS BEHIND KEY HOLE
                     translate([2, 0, 0])
@@ -774,40 +765,25 @@ module main(side) {
                     // Cut out hole in side wall for access to thumb hinge
                     rotate([90, 0, switchAngle.z]){
                         translate([4.3 + hingeDia, block.z - topThickness - hingeDia/2 - raiseThumbBlock, 0]){
-                            cylinder(d=hingeHoleDia, h=hingeThickness*8 + .1, center=true);
+                            cylinder(d=hingeHoleDia, h=16 + .1, center=true);
                         }
                     }
 
                 }  // difference
 
-                /*// bump for locking thumb folding leg in place*/
-                /*difference(){*/
-                /*    rotate(switchAngle)*/
-                /*        translate([5.0, -.33 - (lockBumpRadius - lockBumpSize), block.z - topThickness - 10])*/
-                /*            sphere(lockBumpRadius);*/
-                /*    translate([0, -5, block.z - topThickness - 12.5])*/
-                /*        cube([10, 5, 5]);*/
-                /*}*/
-
                 // bump for locking thumb folding leg in place (upright)
                 rotate(switchAngle)
-                    translate([5.0, -.33 + lockBumpSize, block.z - topThickness - 10])
+                    translate([4.0, -.33 + lockBumpSize, block.z - topThickness - 10.2])
                     rotate([90, 0, 0])
-                    cylinder(r=lockBumpRadius - .1, h=lockBumpSize + 1);
+                    cylinder(r=lockBumpRadius - .1, h=lockBumpSize + .1);
 
                 // bump for locking thumb folding leg in place (folded)
                 rotate(switchAngle)
-                    translate([16.75,
+                    translate([17.05,
                             -.33 + lockBumpSize,
-                            block.z - topThickness - 7.97])
+                            block.z - topThickness - 8.83])
                     rotate([90, 0, 0])
                     cylinder(r=lockBumpRadius - .1, h=lockBumpSize + 1);
-
-                /*// bump for locking back folding leg in place*/
-                /*if (side == -1) { // Left side only; right side goes on MCU Cover*/
-                /*    translate([11.74 + (lockBumpRadius - lockBumpSize), 78.15, block.z - topThickness - 8])*/
-                /*        sphere(2);*/
-                /*}*/
 
                 // bump for locking back folding leg in place (standing)
                 if (side == -1) { // Left side only; right side goes on MCU Cover
@@ -821,10 +797,8 @@ module main(side) {
                     difference(){
                         // build up where bump goes on inside wall
                         union(){
-                            translate([11.75, 75.4, block.z - topThickness - 13])
-                                cube([3.15, 1.8, 13.1]);
-                            translate([11.75, 65.4, block.z - topThickness - 10.7])
-                                cube([3.15, 11, 12]);
+                            translate([11.75, 65.4, block.z - topThickness - 12.80])
+                                cube([3.15, 11.8, 12.9]);
                         // bump for locking back folding leg in place (folded)
                         translate([11.06, 68.9, block.z - topThickness - 8.2])
                             rotate([0, 90, 0])
@@ -835,6 +809,9 @@ module main(side) {
                             rotate([0, 90, 0])
                             cylinder(d=hingeHoleDia, h=17);
                         // Cut support on angle to smooth out
+                        translate([12.5, 73.5, block.z - topThickness - 14.2])
+                            rotate([80, 0, 0])
+                            cube([5, 4, 10], center=true);
                         translate([12.5, 65, block.z - topThickness - 10])
                             rotate([45, 0, 0])
                             cube([5, 4, 10], center=true);
@@ -862,21 +839,18 @@ module main(side) {
                         rotate([0, 0, -90]){
                             // Need to put hinges in different spots to avoid the switch wires
                             if (side == 1) { // if right side
-                                translate([0, 0, -13.5]) hinge();
-                                translate([0, 0, -12.8]) hinge();
-                                translate([0, 0, -4.1]) hinge();
+                                translate([0, 0, -13.5]) hinge(2.7);
+                                translate([0, 0, -4.1]) hinge(2);
                                 difference(){
-                                    translate([0, 0, -17.7]) hinge();
+                                    translate([0, 0, -17.7]) hinge(2);
                                     // Cut off part of hinge sticking out over edge of board
                                     rotate([switchAngle.z, 0, 0])
                                         translate([-7, -18.88, -20]) cube([10, 10, 10]);
                                 }
                             } else { // if left side
-                                translate([0, 0,  -1.0]) hinge();
-                                translate([0, 0,  -2.0]) hinge();
-                                translate([0, 0,  -7.0]) hinge();
-                                translate([0, 0,  -7.9]) hinge();
-                                translate([0, 0,  -14.1]) hinge();
+                                translate([0, 0,  -2.0]) hinge(3);
+                                translate([0, 0,  -7.9]) hinge(2.9);
+                                translate([0, 0,  -14.1]) hinge(2);
                             }
                         }
                     }
@@ -885,11 +859,9 @@ module main(side) {
                 // Back leg
                 translate([11, block.y - 14, block.z - topThickness - hingeDia/2 - 2*raiseThumbBlock]){
                     rotate([0, 90, 180]){
-                        translate([0, 0, -0.8]) hinge();
-                        translate([0, 0, 0]) hinge();
-                        translate([0, 0, 4.2]) hinge();
-                        translate([0, 0, 8.4]) hinge();
-                        translate([0, 0, 9.0]) hinge();
+                        translate([0, 0, -0.8]) hinge(2.8);
+                        translate([0, 0, 4.2]) hinge(2);
+                        translate([0, 0, 8.4]) hinge(2.6);
                     }
                 }
 
