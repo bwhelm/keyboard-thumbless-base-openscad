@@ -349,6 +349,14 @@ module thumb(side) {
                                 translate([0, keyWidth/2, keyFromBottom + keyHeight/2])
                                 keyhole(side);
 
+                            // GROOVES FOR WIRES
+                            rotate(switchAngle){
+                                translate([5.5, 3.0 - (side - 1)*5, block.z - topThickness - 4.3])
+                                    cube([1.51, 2.7, 5]);
+                                translate([5.5, 8.6 + (side - 1)*.65, block.z - topThickness - 2.2])
+                                    cube([1.51, 2.7, 3]);
+                                }
+
                             // EXCESS BEHIND KEY HOLE
                             // Undercut the bumper
                             translate([2, 0, 0])
@@ -639,8 +647,8 @@ module main(side) {
                             cube([clipSlotLength + 1, clipWidth + 2, 10]);
                         }
                         // ethernet jack
-                        translate([84 - PCBOrigin.x, PCBOrigin.y - 158.7, block.z-2.8])
-                            cube([15.5, 25.5, 3]);
+                        translate([84 - PCBOrigin.x, PCBOrigin.y - 158.7 - (side - 1) / 2 *12.5, block.z - 2.2])
+                            cube([15.5, 13, 2.3]);
                     }
 
                     // CUT ALL OTHER CURVES
@@ -776,13 +784,30 @@ module main(side) {
                         }
                     }
 
+                    // GROOVES FOR WIRES
+                    if (side==1) {  // Right side
+                    rotate(switchAngle){
+                        translate([5.5, 4.14, block.z - topThickness - .01])
+                            cube([8, 2.7, 1.01]);
+                        translate([5.5, 8.25, block.z - topThickness - .01])
+                            cube([8, 2.5, 1.01]);
+                    }
+                    } else {        // Left side
+                    rotate(switchAngle){
+                        translate([5.5, 7.96, block.z - topThickness - .01])
+                            cube([8, 2.7, 1.01]);
+                        translate([5.5, 14.15, block.z - topThickness - .01])
+                            cube([8, 2.5, 1.01]);
+                    }
+                    }
+
                 }  // difference
 
-                // ridges around clip hole to prevent warping
-                translate([PCBOrigin.x+5 - 1, PCBOrigin.y - 111.9 - 3.5, block.z - 3.8])
-                    cube([clipSlotLength + 1, 1.5, 3]);
-                translate([PCBOrigin.x+5 - 1, PCBOrigin.y - 111.9 + clipWidth + 2, block.z - 3.8])
-                    cube([clipSlotLength + 1, 1.5, 3]);
+                // // ridges around clip hole to prevent warping
+                // translate([PCBOrigin.x+5 - 14, PCBOrigin.y - 111.9 - 3.5, block.z - 4.0])
+                //     cube([clipSlotLength + 9, 1.5, 3]);
+                // translate([PCBOrigin.x+5 - 14, PCBOrigin.y - 111.9 + clipWidth + 2, block.z - 4.0])
+                //     cube([clipSlotLength + 9, 1.5, 3]);
 
                 // bump for locking thumb folding leg in place (upright)
                 rotate(switchAngle)
@@ -818,7 +843,7 @@ module main(side) {
                             cylinder(r=lockBumpRadius - .1, h=lockBumpSize);
                         }
                         // Drill hole through hinge
-                        translate([-1, 73.7, block.z - topThickness - 3.2])
+                        translate([-1, 71.8, block.z - topThickness - 3.2])
                             rotate([0, 90, 0])
                             cylinder(d=hingeHoleDia, h=17);
                         // Cut support on angle to smooth out
@@ -903,22 +928,29 @@ module clip(clipNumber){  // clipNumber = how many clips to produce
                             union(){
                                 translate([clipTipLength,0,0])  // Main body
                                     cube([clipSlotLength-clipTipLength + clipSlotGap + stringHoleRadius, clipWidth, clipThickness], center=false);
-                                translate([clipTipLength, clipWidth, (clipThickness + clipSlotDepth)/2])  // add front angle
+                                // add front angle
+                                translate([clipTipLength, clipWidth, (clipThickness + clipSlotDepth)/2])
                                     rotate([0,-clipTipAngle,180])
                                     cube([clipTipLength, clipWidth, (clipThickness-clipSlotDepth)/2]);
-                                translate([clipTipLength, 0, (clipThickness - clipSlotDepth)/2])  // add front angle
+                                // add front angle
+                                translate([clipTipLength, 0, (clipThickness - clipSlotDepth)/2])
                                     rotate([180,clipTipAngle,180])
                                     cube([clipTipLength, clipWidth, (clipThickness-clipSlotDepth)/2]);
+                                // string end
                                 translate([clipSlotLength + stringHoleRadius + clipSlotGap, clipWidth/2, 0])
-                                    cylinder(h=clipThickness, r=clipWidth/2, center=false);                              // string end
+                                    cylinder(h=clipThickness, r=clipWidth/2, center=false);
                             }
+                            // remove slot
                             translate([clipSlotLength + stringHoleRadius + clipSlotGap, clipWidth/2, -.1])
-                                cylinder(h=clipThickness + .2, r=stringHoleRadius, center=false);                    // remove slot
+                                cylinder(h=clipThickness + .2, r=stringHoleRadius, center=false);
+                            // remove string hole
                             translate([-.1,-.1,(clipThickness-clipSlotDepth)/2])
-                                cube([clipSlotLength + .1, clipWidth + .2, clipSlotDepth], center=false);                    // remove string hole
-                            translate([0,-.1,-clipSlotDepth])         // shave off bottom
+                                cube([clipSlotLength + .1, clipWidth + .2, clipSlotDepth], center=false);
+                            // shave off bottom
+                            translate([0,-.1,-clipSlotDepth])
                                 cube([clipSlotLength, clipWidth + .2, clipSlotDepth], center=false);
-                            translate([0,-.1,clipThickness])         // shave off top
+                            // shave off top
+                            translate([0,-.1,clipThickness])
                                 cube([clipSlotLength, clipWidth + .2, clipSlotDepth], center=false);
                         }
 
@@ -937,13 +969,15 @@ module clip(clipNumber){  // clipNumber = how many clips to produce
                             cube([clipToothWidth, clipWidth, clipToothDepth], center=false);
 
                         // Add ridge on top and bottom
+                        // ridge on top
                         translate([clipTipLength - stringHoleRadius*3/2 - clipSlotGap/3.4,
                                 clipRidgeWidth,
-                                clipThickness])  // ridge on top
+                                clipThickness])
                             cube([clipSlotLength, clipRidgeWidth, clipRidgeHeight], center=false);
+                        // ridge on bottom
                         translate([clipTipLength - stringHoleRadius*3/2 - clipSlotGap/3.4,
                                 clipRidgeWidth,
-                                -clipRidgeHeight])  // ridge on bottom
+                                -clipRidgeHeight])
                             cube([clipSlotLength, clipRidgeWidth, clipRidgeHeight], center=false);
 
                     }
