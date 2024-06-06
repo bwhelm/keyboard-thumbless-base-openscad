@@ -1,5 +1,13 @@
 $fn= $preview ? 32 : 128; // render more accurately than preview
 segments = $preview ? 32 : 512;  // render some curves more accurately still
+
+// VARIABLES DEFINING WHAT TO BUILD (and where)
+RIGHT = true;     // whether to print right side components
+LEFT  = true;     // whether to print left side components
+THUMB = "print";  // "print", "inplace", "folded"
+LEG   = "print";  // "print", "inplace", "folded"
+MCU   = "print";  // "print", "inplace"
+CLIP  = true;     // whether to print string clip
 FINAL = true;             // Don't render everything when false!
 
 switchHoleSide = 14.5;    // size of square hole in mm
@@ -53,7 +61,7 @@ lockBumpRadius = 2;        // size of cylinder for locking bump
 clipThickness = 7.0;       // Thickness of clip in mm
 clipToothDepth = .15;      // thickness of tooth at front of slot
 clipToothWidth = 1;        // thickness of front teeth
-clipSlotDepth = 1.7;       // depth of slot; PCB is 1.6mm
+clipSlotDepth = 2.7;       // depth of slot; PCB is 1.6mm, plus 1mm for stand
 clipSlotLength = 14;       // length of slot
 clipSlotGap = 0.5;         // gap between slot and string hole
 clipTipAngle = 9;          // angle of opening of slot
@@ -316,16 +324,6 @@ module thumb(side) {
     thumbBlockThickness = 7;
     side = side == "left" ? -1 : 1;
 
-    // put on baseplate for printing
-    translate([side * 9.5 - 12, (1 + side) * 19.5 - 3, block.z - 12.52])
-        rotate([90, -90, 0])
-        rotate([0, 0, side * -switchAngle.z])
-
-    // // flip to folded position (approximate)
-    // translate([38.50, side * 18.8, block.z-16.76])
-    //     rotate([0, -90, side * switchAngle.z])
-    //     rotate([0, 0, side * -switchAngle.z])
-
         // flip the board if on the left side
         mirror([0, -(side - 1) / 2, 0]){
             translate([0, 0, -raiseThumbBlock]){
@@ -437,23 +435,6 @@ module thumb(side) {
                         rotate([70, 0, 0])
                         cube([5, 5, 1]);
 
-                    // Make mark identifying side
-                    rotate(switchAngle)
-                    rotate([0, 90, 0])
-                    if (side == 1) {
-                        rotate([0, 0, 90])
-                            translate([2, 18, 6.5])
-                            linear_extrude(height=0.6)
-                            text("R", size=7);
-                    }
-                    else {
-                        rotate([0, 180, 90])
-                            translate([-17, 18, -7.1])
-                            linear_extrude(height=0.6)
-                            text("L", size=7);
-                    }
-
-
                 } // difference
             } // translate
         } // mirror
@@ -462,23 +443,13 @@ module thumb(side) {
 module leg(side){
     side = side == "left" ? -1 : 1;
 
-    // put on baseplate for printing
-    translate([-23.4, 0, -block.z - 1.16])
-        rotate([0, 90, 0])
-        rotate([0, 0, side * 90])
-        rotate([0, 90, 0])
-
-    // // flip to folded position (approximate)
-    // translate([0, side * 39.0, 104.60])
-    //     rotate([side * -90, 0, 0])
-
         // flip the board if on the left side
         mirror([0, -(side - 1) / 2, 0])
 
         difference(){
             union(){
-                translate([0, 74.66, -raiseThumbBlock])
-                    cube([11.64, topThickness + 2.5, block.z - topThickness + raiseThumbBlock]);
+                translate([0, 75.16, -raiseThumbBlock])
+                    cube([11.64, topThickness + 2, block.z - topThickness + raiseThumbBlock]);
 
                 // BUMPERS
                 // Cylinder for bumper
@@ -494,8 +465,8 @@ module leg(side){
                 // Hinge
                 translate([.55, block.y - 15.9, block.z - topThickness - hingeDia/2 - 2*raiseThumbBlock]){
                     rotate([-90, 0, 0]) rotate([0, 90, 0]){
-                        translate([0, 0, 2.1]) hinge(2);
-                        translate([0, 0, 6.3]) hinge(2);
+                        translate([0, 0, 2.1]) hinge(1.9);  // Gap is 2mm
+                        translate([0, 0, 6.3]) hinge(1.9);  // Gap is 2mm
                     }
                 }
 
@@ -521,7 +492,7 @@ module leg(side){
 
             // Round corner
             difference() {
-                translate([2.5, PCBOrigin.y - PCBTopEdge - 2.5, block.z/2])
+                translate([2.5, PCBOrigin.y - PCBTopEdge - 2.49, block.z/2])
                     cube([5.01, 5.01, block.z+1], center=true);
                 translate([5, PCBOrigin.y - PCBTopEdge - 5, block.z/2])
                     rotate([0, 0, 90])
@@ -643,8 +614,13 @@ module main(side) {
                                 cube([8.6, 6.6, 2.5], center=true);
                         }
                         // String clip:
+                        // FIXME: The stand has been warping when this slot is completely open. Putting fins on either side hasn't helped.
                         translate([PCBOrigin.x+5.1 - 1, PCBOrigin.y - 111.9 - 1, block.z-5]){
-                            cube([clipSlotLength + 1, clipWidth + 2, 10]);
+                            cube([clipSlotLength + 1, clipWidth + 2, 4], center=false);  // 5+ means open slot
+                            // cut slight angle at end of slot
+                            translate([6, 0, 0.25])
+                                rotate([0, -15, 0])
+                                    cube([10, clipWidth + 2, 2]);
                         }
                         // ethernet jack
                         translate([84 - PCBOrigin.x, PCBOrigin.y - 158.7 - (side - 1) / 2 *12.5, block.z - 2.2])
@@ -773,9 +749,11 @@ module main(side) {
                     // 3. Outside close bumper
                     translate([100-bumperDia/2-.5, bumperDia+4, 35.0])
                         cylinder(d=bumperDia-2, h=4);
+                        // cylinder(d=bumperDia-2, h=6);
                     // 4. Outside far bumper
                     translate([100-bumperDia/2-.5, PCBTopEdge-bumperDia-1, 35.0])
                         cylinder(d=bumperDia-2, h=4);
+                        // cylinder(d=bumperDia-2, h=6);
 
                     // Cut out hole in side wall for access to thumb hinge
                     rotate([90, 0, switchAngle.z]){
@@ -920,7 +898,7 @@ module main(side) {
 
 module clip(clipNumber){  // clipNumber = how many clips to produce
     for (i = [0:clipNumber - 1]) {
-        translate([-clipSlotLength-clipWidth - 1, -60 -(clipThickness + 2) * i - 2, block.z - clipWidth]) {
+        translate([-clipSlotLength-clipWidth - 1, -40 -(clipThickness + 2) * i - 2, block.z - clipWidth]) {
             rotate([90, 0, 0]) {
                 difference(){
                     union(){
@@ -990,41 +968,120 @@ module clip(clipNumber){  // clipNumber = how many clips to produce
 
 // GENERATE MODEL
 
-// // BEGIN SLICE OFF CHUNK OF MODEL
-// difference(){
-//     union(){
+module build() {
 
-// RIGHT SIDE
-main("right");
-thumb("right");
-leg("right");
+    // // BEGIN SLICE OFF CHUNK OF MODEL
+    // difference(){
+    //     union(){
 
-// LEFT SIDE
-translate([0,-1,0]) {
-    main("left");
-    thumb("left");
-    leg("left");
-}
+    // RIGHT SIDE
+    if (RIGHT) {
+        side = 1;
 
-// MCU COVER -- For printing
-translate([-41, 86, 0]) {
-    rotate([0, 0, 180]) {
-        MCUCover();
+        // MAIN STAND
+        main("right");
+
+        // THUMB LEG
+        if (THUMB == "print")
+            // put on baseplate for printing
+            translate([side * 9.5 - 12, (1 + side) * 19.5 - 3, block.z - 12.52])
+                rotate([90, -90, 0])
+                rotate([0, 0, side * -switchAngle.z])
+                thumb("right");
+        else if (THUMB == "inplace")
+            thumb("right");
+        else if (THUMB == "folded")
+            // flip to folded position (approximate)
+            translate([38.50, side * 18.8, block.z-16.76])
+                rotate([0, -90, side * switchAngle.z])
+                rotate([0, 0, side * -switchAngle.z])
+                thumb("right");
+
+        // BACK LEG
+        if (LEG == "print")
+            // put on baseplate for printing
+            translate([-23.4, 0, -block.z - 1.16])
+                rotate([0, 90, 0])
+                rotate([0, 0, side * 90])
+                rotate([0, 90, 0])
+                leg("right");
+        else if (LEG == "inplace")
+            leg("right");
+        else if (LEG == "folded")
+            // flip to folded position (approximate)
+            translate([0, side * 39.0, 104.60])
+                rotate([side * -90, 0, 0])
+                leg("right");
+
+        // MCU COVER
+        if (MCU == "print") {
+            // put on baseplate for printing
+            translate([-41, 86, 0]) {
+                rotate([0, 0, 180]) {
+                    MCUCover();
+                }
+            }
+        } else if (MCU == "inplace") {
+            translate([2.7, 34.85, block.z*2-MCUCoverSize.z-topThickness]) {
+                rotate([180, 0, 180]) {
+                    MCUCover();
+                }
+            }
+        }
+
     }
+
+    // LEFT SIDE
+    if (LEFT) {
+        side = -1;
+
+        translate([0,-1,0]) {
+            main("left");
+
+            if (THUMB == "print")
+                // put on baseplate for printing
+                translate([side * 9.5 - 12, (1 + side) * 19.5 - 3, block.z - 12.52])
+                    rotate([90, -90, 0])
+                    rotate([0, 0, side * -switchAngle.z])
+                    thumb("left");
+            else if (THUMB == "inplace")
+                thumb("left");
+            else if (THUMB == "folded")
+                // flip to folded position (approximate)
+                translate([38.50, side * 18.8, block.z-16.76])
+                    rotate([0, -90, side * switchAngle.z])
+                    rotate([0, 0, side * -switchAngle.z])
+                    thumb("left");
+
+            if (LEG == "print")
+                // put on baseplate for printing
+                translate([-23.4, 0, -block.z - 1.16])
+                    rotate([0, 90, 0])
+                    rotate([0, 0, side * 90])
+                    rotate([0, 90, 0])
+                    leg("left");
+            else if (LEG == "inplace")
+                leg("left");
+            else if (LEG == "folded")
+                // flip to folded position (approximate)
+                translate([0, side * 39.0, 104.60])
+                    rotate([side * -90, 0, 0])
+                    leg("left");
+
+        }
+
+    }
+
+    // STRING CLIP
+    if (CLIP)
+        clip(2);
+
+    // // END SLICE OFF CHUNK OF MODEL
+    // }
+    // translate([25, -100, 0]) cube([100, 200, 100]);
+    // translate([0, -90, 0]) cube([100, 62, 100]);
+    // }
+
 }
 
-// // MCU COVER -- Put in place
-// translate([2.7, 34.85, block.z*2-MCUCoverSize.z-topThickness]) {
-//  rotate([180, 0, 180]) {
-//      MCUCover();
-//  }
-// }
-
-// // STRING CLIP
-// clip(2);
-
- // // END SLICE OFF CHUNK OF MODEL
- // }
- // translate([25, -100, 0]) cube([100, 200, 100]);
- // translate([0, -90, 0]) cube([100, 62, 100]);
- // }
+build();
