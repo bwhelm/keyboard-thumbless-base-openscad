@@ -4,8 +4,9 @@ segments = $preview ? 32 : 512;  // render some curves more accurately still
 // VARIABLES DEFINING WHAT TO BUILD (and where)
 RIGHT = true;             // whether to print right side components
 LEFT  = true;             // whether to print left side components
-THUMB = "folded";         // "print", "inplace", "folded"
-LEG   = "folded";         // "print", "inplace", "folded"
+MAIN = true;              // whether to print main stand
+THUMB = "print";          // "print", "inplace", "folded"
+LEG   = "print";          // "print", "inplace", "folded"
 MCU   = "print";          // "print", "inplace"
 CLIP  = false;            // whether to print string clip
 FINAL = true;             // Don't render everything when false!
@@ -67,7 +68,6 @@ clipSlotGap = 0.5;         // gap between slot and string hole
 clipTipAngle = 9;          // angle of opening of slot
 clipTipLength = 3.5;       // length of (angled) tip
 clipRidgeHeight = 0.5;     // height of ridge above and below
-
 clipWidth = stringHoleRadius * 4;           // width of clip
 clipRidgeWidth = clipWidth/3;                   // width of ridge on top and bottom
 
@@ -401,14 +401,16 @@ module thumb(side) {
                                         // translate([0, 0,  0]) hinge(2);
                                         // translate([0, 0, 5.7]) hinge(2.9);
                                         // translate([0, 0, 13.6]) hinge(2);
-                                        translate([0, 0,  2.95]) hingeTEST(10.3, -1, -1);
+                                        translate([0, 0,  2.45]) hingeTEST(9.8, -1, -1);
                                     } else {         // if left side
                                         // translate([0, 0,  2.1]) hinge(2.8);
                                         // translate([0, 0, 10.0]) hinge(2);
                                         // translate([0, 0, 15.7]) hinge(2);
-                                        translate([0, 0,  2.1]) hingeTEST(2.8, -1, -1);
-                                        translate([0, 0, 8.0]) hingeTEST(3.2, -1, -1);
-                                        translate([0, 0, 13.6]) hingeTEST(4.1, -1, 0);
+                                        translate([0, 0, 1.84]) hingeTEST(2.5, -1, -1);
+                                        translate([0, 0,  7.1]) hingeTEST(8.9, -1, -1);
+                                        // translate([0, 0,  2.1]) hingeTEST(2.8, -1, -1);
+                                        // translate([0, 0, 8.0]) hingeTEST(3.2, -1, -1);
+                                        // translate([0, 0, 13.6]) hingeTEST(4.1, -1, 0);
                                     }
                             }
                         }
@@ -619,7 +621,7 @@ module main(side) {
                         // String clip:
                         // FIXME: The stand has been warping when this slot is completely open. Putting fins on either side hasn't helped.
                         translate([PCBOrigin.x+5.1 - 1, PCBOrigin.y - 111.9 - 1, block.z-5]){
-                            cube([clipSlotLength + 1, clipWidth + 2, 4], center=false);  // 5+ means open slot
+                            cube([clipSlotLength + 1, clipWidth + 2, 6], center=false);  // 5+ means open slot
                             // cut slight angle at end of slot
                             translate([6, 0, 0.25])
                                 rotate([0, -15, 0])
@@ -758,10 +760,10 @@ module main(side) {
                         cylinder(d=bumperDia-2, h=4);
                         // cylinder(d=bumperDia-2, h=6);
 
-                    // // Cut out hole in side wall for access to thumb hinge
-                    // rotate([90, 0, switchAngle.z])
-                    //     translate([4.3 + hingeDia, block.z - topThickness - hingeDia/2 - raiseThumbBlock, 0])
-                    //         cylinder(d=hingeHoleDia, h=16 + .1, center=true);
+                    // Cut out hole in side wall for access to thumb hinge
+                    rotate([90, 0, switchAngle.z])
+                        translate([4.3 + hingeDia, block.z - topThickness - hingeDia/2 - raiseThumbBlock, 0])
+                            cylinder(d=hingeHoleDia, h=16 + .1, center=true);
 
                     // GROOVES FOR WIRES
                     if (side==1) {  // Right side
@@ -855,10 +857,10 @@ module main(side) {
                             if (side == 1) { // if right side
                                 // translate([0, 0, -13.5]) hinge(2.5);
                                 // translate([0, 0, -4.1]) hinge(2);
-                                translate([0, 0, -2.8]) hingeTEST(3.3, 5.15, 0);
+                                translate([0, 0, -2.4]) hingeTEST(2.8, 5.15, 0);
                                 difference(){
                                     // translate([0, 0, -17.7]) hinge(2);
-                                    translate([0, 0, -17.7]) hingeTEST(4.32, 0, 5.15);
+                                    translate([0, 0, -17.7]) hingeTEST(5.32, 0, 5.15);
                                     // Cut off part of hinge sticking out over edge of board
                                     rotate([switchAngle.z, 0, 0])
                                         translate([-7, -18.88, -20]) cube([10, 10, 10]);
@@ -867,9 +869,16 @@ module main(side) {
                                 // translate([0, 0,  -2.0]) hinge(3);
                                 // translate([0, 0,  -7.9]) hinge(2.9);
                                 // translate([0, 0,  -14.1]) hinge(2);
-                                translate([0, 0,  -2.0]) hingeTEST(3, 1.4, 0);
-                                translate([0, 0,  -7.9]) hingeTEST(2.9, 1.6, 1.4);
-                                translate([0, 0,  -13.5]) hingeTEST(2.2, 2.05, 1.7);
+                                translate([0, 0,  -1.7]) hingeTEST(2.7, 1.4, 0);
+                                translate([0, 0,  -6.97]) hingeTEST(2.5, 2.05, 1.7);
+                                difference(){
+                                    translate([0, 0, -19.94]) hingeTEST(3.8, 0, 5.15);
+                                    rotate([switchAngle.z, 0, 0])
+                                        translate([-7, -18.88, -20]) cube([10, 10, 10]);
+                                }
+                                // translate([0, 0,  -2.0]) hingeTEST(3, 1.4, 0);
+                                // translate([0, 0,  -7.9]) hingeTEST(2.9, 1.6, 1.4);
+                                // translate([0, 0,  -13.5]) hingeTEST(2.2, 2.05, 1.7);
                             }
                         }
                     }
@@ -976,13 +985,14 @@ module build() {
         side = 1;
 
         // MAIN STAND
-        main("right");
+        if (MAIN)
+            main("right");
 
         // THUMB LEG
         if (THUMB == "print")
             // put on baseplate for printing
             rotate([90, -90, 0])
-                translate([23.25, 0, -42.9])
+                translate([27.45, 1.5, -36.5])
                 rotate([0, 0, side * -switchAngle.z])
                 thumb("right");
         else if (THUMB == "inplace")
@@ -997,7 +1007,7 @@ module build() {
         // BACK LEG
         if (LEG == "print")
             // put on baseplate for printing
-            translate([-23.4, 0, -block.z - 1.16])
+            translate([-22, 0, -block.z - 1.16])
                 rotate([0, 90, 0])
                 rotate([0, 0, side * 90])
                 rotate([0, 90, 0])
@@ -1033,11 +1043,12 @@ module build() {
         side = -1;
 
         translate([0,-1,0]) {
-            main("left");
+            if (MAIN)
+                main("left");
 
             if (THUMB == "print")
                 // put on baseplate for printing
-                translate([side * 9.5 - 12, (1 + side) * 19.5 - 3, block.z - 12.52])
+                translate([side * 9.5 - 11, (1 + side) * 19.5 - 3, block.z - 12.52])
                     rotate([90, -90, 0])
                     rotate([0, 0, side * -switchAngle.z])
                     thumb("left");
@@ -1052,7 +1063,7 @@ module build() {
 
             if (LEG == "print")
                 // put on baseplate for printing
-                translate([-23.4, 0, -block.z - 1.16])
+                translate([-22, 0, -block.z - 1.16])
                     rotate([0, 90, 0])
                     rotate([0, 0, side * 90])
                     rotate([0, 90, 0])
@@ -1084,55 +1095,58 @@ module build() {
 
 build();
 
-// hingeDia = 5.5;
-// hingeHoleDia = 1.7277;  // = 14 gauge (use copper wire): 1.6277mm
-module hingeTEST(hingeThickness, coneL, coneR) {
-    // Thumb Hinge
-    // coneL and coneR determine whether to add (>0) or subtract (-1) cones or do nothing (0).
-    // When coneL/coneR is >0, the number provides the height of the relevant cone.
-    // (Max for cone is 5mm.)
-    a = .5;  // distance from top to start cone
-    c = .5;  // distance from middle to end cone
-    difference(){
-        union(){
-            cylinder(d=hingeDia, h=hingeThickness);
-            if (coneL > 0) {
-                mirror([0, 0, 1])
-                    cylinder(d1=hingeDia - 2*a - .1, d2=0, h=(coneL>5) ? 5 : coneL);
-                translate([0, 0, (coneL > 5) ? -5 : -coneL - hingeGap])
-                    cylinder(r=c - .1, h=(coneL > 5) ? 5 : coneL + hingeGap);  // adding hingeGap to ensure these connect from each side
-            }
-            if (coneR > 0) {
-                translate([0, 0, hingeThickness])
-                    cylinder(d1=hingeDia - 2*a - .1, d2=0, h=(coneR > 5) ? 5 : coneR);
-                translate([0, 0, hingeThickness])
-                    cylinder(r=c - .1, h=(coneR > 5) ? 5 : coneR + hingeGap);  // adding hingeGap to ensure these connect from each side
-            }
-            translate([-hingeDia/2 - 1, -hingeDia/2, 0]) cube([hingeDia/2 + 1, hingeDia*2, hingeThickness]);
-            // Add extra support to base
-            cube([hingeDia/4, hingeDia, hingeThickness]);
-        }
+module hingeTEST(hingeThickness, x, y)
+    hinge(hingeThickness);
 
-        if (coneL < 0) {
-            translate([0, 0, -0.01])
-            cylinder(d1=hingeDia - 2*a, d2=0, h=(hingeThickness > 10) ? 5 : hingeThickness/2);
-            // Cut hole through hinge
-            cylinder(r=c, h=(hingeThickness > 10) ? 5.01 + hingeGap : hingeThickness/2 + hingeGap + .01);
-        }
-
-        if (coneR < 0) {
-            translate([0, 0, hingeThickness + .01]) mirror([0, 0, 1]) {
-                translate([0, 0, -0.01])
-                    cylinder(d1=hingeDia - 2*a, d2=0, h=(hingeThickness > 10) ? 5 : hingeThickness/2);
-                // Cut hole through hinge
-                cylinder(r=c, h=(hingeThickness > 10) ? 5.01 : hingeThickness/2 + hingeGap + .01);
-            }
-        }
-
-        // Cut off excess extra support
-        translate([-5, 8.7, -.05])
-            rotate([0, 0, -45])
-            cube([12, 5, hingeThickness+.1]);
-
-    }
-}
+// // hingeDia = 5.5;
+// // hingeHoleDia = 1.7277;  // = 14 gauge (use copper wire): 1.6277mm
+// module hingeTEST(hingeThickness, coneL, coneR) {
+//     // Thumb Hinge
+//     // coneL and coneR determine whether to add (>0) or subtract (-1) cones or do nothing (0).
+//     // When coneL/coneR is >0, the number provides the height of the relevant cone.
+//     // (Max for cone is 5mm.)
+//     a = .5;  // distance from top to start cone
+//     c = .5;  // distance from middle to end cone
+//     difference(){
+//         union(){
+//             cylinder(d=hingeDia, h=hingeThickness);
+//             if (coneL > 0) {
+//                 mirror([0, 0, 1])
+//                     cylinder(d1=hingeDia - 2*a - .1, d2=0, h=(coneL>5) ? 5 : coneL);
+//                 translate([0, 0, (coneL > 5) ? -5 : -coneL - hingeGap])
+//                     cylinder(r=c - .1, h=(coneL > 5) ? 5 : coneL + hingeGap);  // adding hingeGap to ensure these connect from each side
+//             }
+//             if (coneR > 0) {
+//                 translate([0, 0, hingeThickness])
+//                     cylinder(d1=hingeDia - 2*a - .1, d2=0, h=(coneR > 5) ? 5 : coneR);
+//                 translate([0, 0, hingeThickness])
+//                     cylinder(r=c - .1, h=(coneR > 5) ? 5 : coneR + hingeGap);  // adding hingeGap to ensure these connect from each side
+//             }
+//             translate([-hingeDia/2 - 1, -hingeDia/2, 0]) cube([hingeDia/2 + 1, hingeDia*2, hingeThickness]);
+//             // Add extra support to base
+//             cube([hingeDia/4, hingeDia, hingeThickness]);
+//         }
+//
+//         if (coneL < 0) {
+//             translate([0, 0, -0.01])
+//             cylinder(d1=hingeDia - 2*a, d2=0, h=(hingeThickness > 10) ? 5 : hingeThickness/2);
+//             // Cut hole through hinge
+//             cylinder(r=c, h=(hingeThickness > 10) ? 5.01 + hingeGap : hingeThickness/2 + hingeGap + .01);
+//         }
+//
+//         if (coneR < 0) {
+//             translate([0, 0, hingeThickness + .01]) mirror([0, 0, 1]) {
+//                 translate([0, 0, -0.01])
+//                     cylinder(d1=hingeDia - 2*a, d2=0, h=(hingeThickness > 10) ? 5 : hingeThickness/2);
+//                 // Cut hole through hinge
+//                 cylinder(r=c, h=(hingeThickness > 10) ? 5.01 : hingeThickness/2 + hingeGap + .01);
+//             }
+//         }
+//
+//         // Cut off excess extra support
+//         translate([-5, 8.7, -.05])
+//             rotate([0, 0, -45])
+//             cube([12, 5, hingeThickness+.1]);
+//
+//     }
+// }
