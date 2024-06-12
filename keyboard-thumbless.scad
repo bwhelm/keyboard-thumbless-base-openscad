@@ -2,12 +2,12 @@ $fn= $preview ? 32 : 128; // render more accurately than preview
 segments = $preview ? 32 : 512;  // render some curves more accurately still
 
 // VARIABLES DEFINING WHAT TO BUILD (and where)
-RIGHT = false;             // whether to print right side components
+RIGHT = true;             // whether to print right side components
 LEFT  = true;             // whether to print left side components
-MAIN = true;              // whether to print main stand
+MAIN  = true;             // whether to print main stand
 THUMB = "print";          // "print", "inplace", "folded"
-LEG   = "";          // "print", "inplace", "folded"
-MCU   = "";          // "print", "inplace"
+LEG   = "print";          // "print", "inplace", "folded"
+MCU   = "print";          // "print", "inplace"
 CLIP  = false;            // whether to print string clip
 FINAL = true;             // Don't render everything when false!
 
@@ -352,13 +352,15 @@ module thumb(side) {
                                 cube([block.x/2, keyWidth+1, block.z - topThickness - 3]);
 
                             // CUT OUT ARCH BEHIND KEYS (EXTRUDING OVAL OF CORRECT SIZE)
-                            translate([block.x + archFudge,
-                                    block.y/2,
-                                    -1.5 + raiseThumbBlock]) // make sure to leave minimum thickness
-                                rotate([90+archAngle, 90, 0]) // archAngle
-                                linear_extrude(height=2*block.y, center=true)
-                                resize([2*block.z, 2*(block.x - keyMinDepth)])
-                                circle($fn=segments);
+                            if (FINAL) {
+                                translate([block.x + archFudge,
+                                        block.y/2,
+                                        -1.5 + raiseThumbBlock]) // make sure to leave minimum thickness
+                                    rotate([90+archAngle, 90, 0]) // archAngle
+                                    linear_extrude(height=2*block.y, center=true)
+                                    resize([2*block.z, 2*(block.x - keyMinDepth)])
+                                    circle($fn=segments);
+                                }
 
                             //  rotate([0, 21, -16])
                             //      translate([1.2,
@@ -393,7 +395,9 @@ module thumb(side) {
                                         // translate([0, 0,  0]) hinge(2);
                                         // translate([0, 0, 5.7]) hinge(2.9);
                                         // translate([0, 0, 13.6]) hinge(2);
-                                        translate([0, 0,  2.45]) hingeTEST(9.8, -1, -1);
+                                        translate([0, 0,  14.9]) hingeTEST(2.8, -1, -1);
+                                        translate([0, 0,  7.8]) hingeTEST(2.85, -1, -1);
+                                        translate([0, 0,  0.6]) hingeTEST(4.5, -1, -1);
                                     } else {         // if left side
                                         // translate([0, 0,  2.1]) hinge(2.8);
                                         // translate([0, 0, 10.0]) hinge(2);
@@ -411,20 +415,32 @@ module thumb(side) {
 
                     // GROOVES FOR WIRES: THUMB
                     rotate(switchAngle)
-                        if (side == 1) {  // right side FIXME
+                        if (side == 1) {  // right side
                             // top switch
-                            translate([5.5, 3.0 - (side - 1)*5, block.z - topThickness - 4.3])
-                                cube([1.51, 2.7, 5]);
-                            translate([5.5, 8.6 + (side - 1)*.65, block.z - topThickness - 2.2])
-                                cube([1.51, 2.7, 3]);
-                            // bottom switch
+                            translate([5.3, 4.0, block.z - topThickness - 2.9])
+                                rotate([-45, 0, 0])
+                                cube([1.61, 1.7, 6]);
+                            // center
+                            translate([5.3, 8.2, block.z - topThickness - 2.2])
+                                cube([2, 2.5, 3]);
+                            // bottom switch FIXME
                             rotate([0, 90, 0]) {
-                                translate([-27, 9.5, 7.26])
-                                    cube([20, 2, 2.0], center=true);
                                 // translate([-27, 14.5, 6.26])
-                                translate([-27, -5*(side - 1) + 4.5, 6.26])
+                                // outer hole
+                                translate([-16.6, 3.3, 5.26])
+                                    cube([2, 2.5, 2.0]);
+                                translate([-17.3, 1.7, 5.26])
                                     rotate([0, 0, 45])
-                                    cube([20, 2, 2.0], center=true);
+                                        cube([3.5, 2, 2.0]);
+                                // center hole
+                                translate([-18.6, 8.3, 5.26])
+                                    cube([2, 2.5, 2.0]);
+                                translate([-24, 1.8, 5.26])
+                                    rotate([0, 0, 45])
+                                        cube([10, 2, 2.0]);
+                                // main channel
+                                translate([-37.2, 1.5, 5.26])
+                                    cube([20, 2.5, 2.0]);
                             }
                         } else {  // left side
                             // top switch
@@ -794,10 +810,10 @@ module main(side) {
                     // GROOVES FOR WIRES: BASE
                     if (side==1) {  // Right side FIXME
                     rotate(switchAngle){
-                        translate([5.5, 3.3, block.z - topThickness - .01])
-                            cube([12, 2.7, 2.01]);
-                        translate([5.5, 8.25, block.z - topThickness - .01])
-                            cube([12, 2.5, 2.01]);
+                        translate([5.1, 1.5, block.z - topThickness - .01])
+                            cube([11, 2.5, 2.01]);
+                        translate([5.3, 8.2, block.z - topThickness - .01])
+                            cube([11, 2.5, 2.01]);
                     }
                     } else {        // Left side
                     rotate(switchAngle){
@@ -854,10 +870,10 @@ module main(side) {
                             rotate([0, 90, 0])
                             cylinder(r=lockBumpRadius - .1, h=lockBumpSize);
                         }
-                        // // Drill hole through hinge
-                        // translate([-1, 71.8, block.z - topThickness - 3.2])
-                        //     rotate([0, 90, 0])
-                        //     cylinder(d=hingeHoleDia, h=17);
+                        // Drill hole through hinge
+                        translate([-1, 71.8, block.z - topThickness - 3.2])
+                            rotate([0, 90, 0])
+                            cylinder(d=hingeHoleDia, h=17);
                         // Cut support on angle to smooth out
                         translate([12.5, 65, block.z - topThickness - 14])
                             rotate([45, 0, 0])
@@ -888,14 +904,9 @@ module main(side) {
                             if (side == 1) { // if right side
                                 // translate([0, 0, -13.5]) hinge(2.5);
                                 // translate([0, 0, -4.1]) hinge(2);
-                                translate([0, 0, -2.4]) hingeTEST(2.8, 5.15, 0);
-                                difference(){
-                                    // translate([0, 0, -17.7]) hinge(2);
-                                    translate([0, 0, -17.7]) hingeTEST(5.32, 0, 5.15);
-                                    // Cut off part of hinge sticking out over edge of board
-                                    rotate([switchAngle.z, 0, 0])
-                                        translate([-7, -18.88, -20]) cube([10, 10, 10]);
-                                }
+                                translate([0, 0, -14.8]) hingeTEST(4.0, 0, 5.15);
+                                translate([0, 0, -7.7]) hingeTEST(2.5, 0, 5.15);
+                                translate([0, 0, -0.5]) hingeTEST(1.5, 0, 5.15);
                             } else { // if left side
                                 // translate([0, 0,  -2.0]) hinge(3);
                                 // translate([0, 0,  -7.9]) hinge(2.9);
@@ -1084,7 +1095,7 @@ module build() {
 
             if (THUMB == "print")
                 // put on baseplate for printing
-                translate([side * 9.5 - 11, (1 + side) * 19.5 - 3, block.z - 12.52])
+                translate([side * 9.5 - 11, (1 + side) * 19.5 - 3, block.z - 12.55])
                     rotate([90, -90, 0])
                     rotate([0, 0, side * -switchAngle.z])
                     thumb("left");
