@@ -34,6 +34,10 @@ nutDiameter = 5.08;       // diameter of nut, point to point (actually 5.0mm)
 standoffDiameter = 3.2;   // diameter of standoff
 standoffHeight = 10;      // height needed for MCU under stand
 
+hingeGap = .1;  // gap between hinges
+hingeDia = 5.5;
+hingeHoleDia = 1.7277;  // = 14 gauge (use copper wire): 1.6277mm
+
 bumperDia = 12.1;         // Diameter of bumpers + 2.1mm
 
 keyboardLength = 106;     // length of keyboard to front surface of thumb
@@ -274,6 +278,13 @@ module MCUCover() {
 
             } // union
 
+            // Hinge hole
+            translate([MCUCoverSize.x - 0.14 - 3,
+                    MCUCoverSize.y - 5.4,
+                    3.14])
+                rotate([0, 90, 0])
+                cylinder(d=hingeHoleDia, h=4);
+
             // Cut out interior
             translate([MCUCoverWallThickness, MCUCoverWallThickness + .01, -.01])
                 cube([niceNanoSize.x, MCUCoverSize.y - 1.91 - topThickness, MCUCoverSize.z - MCUCoverTopThickness]);
@@ -294,15 +305,12 @@ module MCUCover() {
     }
 }
 
-hingeGap = .1;  // gap between hinges
-hingeDia = 5.5;
-hingeHoleDia = 1.7277;  // = 14 gauge (use copper wire): 1.6277mm
 module hinge(hingeThickness) {
     // Thumb Hinge
     difference(){
         union(){
             cylinder(d=hingeDia, h=hingeThickness);
-            translate([-hingeDia/2 - 1, -hingeDia/2, 0]) cube([hingeDia/2 + 1, hingeDia*2, hingeThickness]);
+            translate([-hingeDia/2 - .4, -hingeDia/2, 0]) cube([hingeDia/2 + .4, hingeDia*2, hingeThickness]);
             // Add extra support to base
             cube([hingeDia/4, hingeDia, hingeThickness]);
         }
@@ -396,14 +404,14 @@ module thumb(side) {
                                         // translate([0, 0, 5.7]) hinge(2.9);
                                         // translate([0, 0, 13.6]) hinge(2);
                                         translate([0, 0,  14.9]) hingeTEST(2.8, -1, -1);
-                                        translate([0, 0,  7.8]) hingeTEST(2.85, -1, -1);
+                                        translate([0, 0,  7.8]) hingeTEST(2.9, -1, -1);
                                         translate([0, 0,  0.6]) hingeTEST(4.5, -1, -1);
                                     } else {         // if left side
                                         // translate([0, 0,  2.1]) hinge(2.8);
                                         // translate([0, 0, 10.0]) hinge(2);
                                         // translate([0, 0, 15.7]) hinge(2);
-                                        translate([0, 0, 1.84]) hingeTEST(2.5, -1, -1);
-                                        translate([0, 0,  7.1]) hingeTEST(7.6, -1, -1);
+                                        translate([0, 0, 1.8]) hingeTEST(2.5, -1, -1);
+                                        translate([0, 0,  7.0]) hingeTEST(7.6, -1, -1);
                                         // translate([0, 0,  2.1]) hingeTEST(2.8, -1, -1);
                                         // translate([0, 0, 8.0]) hingeTEST(3.2, -1, -1);
                                         // translate([0, 0, 13.6]) hingeTEST(4.1, -1, 0);
@@ -413,17 +421,19 @@ module thumb(side) {
 
                     } // union
 
-                    // GROOVES FOR WIRES: THUMB
+                    // GROOVES FOR WIRES: THUMB FIXME
                     rotate(switchAngle)
-                        if (side == 1) {  // right side
+                        if (side == 1) {                                // RIGHT SIDE
                             // top switch
-                            translate([5.3, 4.0, block.z - topThickness - 2.9])
-                                rotate([-45, 0, 0])
-                                cube([1.61, 1.7, 6]);
+                            translate([4.8, 3.7, block.z - topThickness - 3.5])
+                                rotate([-45, 0, 0]) {
+                                    cube([2.01, 2.0, 8]);
+                                    translate([-1.4, 0, 0]) rotate([0, 12, 0]) cube([2.01, 2.0, 7]);
+                                }
                             // center
-                            translate([5.3, 8.2, block.z - topThickness - 2.2])
-                                cube([2, 2.5, 3]);
-                            // bottom switch FIXME
+                            translate([4.8, 7.9, block.z - topThickness - 2.2])
+                                cube([2, 2.0, 3]);
+                            // bottom switch
                             rotate([0, 90, 0]) {
                                 // translate([-27, 14.5, 6.26])
                                 // outer hole
@@ -431,25 +441,27 @@ module thumb(side) {
                                     cube([2, 2.5, 2.0]);
                                 translate([-17.3, 1.7, 5.26])
                                     rotate([0, 0, 45])
-                                        cube([3.5, 2, 2.0]);
+                                    cube([3.5, 2, 2.0]);
                                 // center hole
                                 translate([-18.6, 8.3, 5.26])
                                     cube([2, 2.5, 2.0]);
                                 translate([-24, 1.8, 5.26])
                                     rotate([0, 0, 45])
-                                        cube([10, 2, 2.0]);
+                                    cube([10, 2, 2.0]);
                                 // main channel
                                 translate([-37.2, 1.5, 5.26])
                                     cube([20, 2.5, 2.0]);
                             }
-                        } else {  // left side
+                        } else {                                        // LEFT SIDE
                             // top switch
-                            translate([5.4, 14.0, block.z - topThickness - 4.3])
-                                rotate([45, 0, 0])
-                                cube([1.61, 1.7, 6]);
+                            translate([4.8, 14.0, block.z - topThickness - 4.3])
+                                rotate([45, 0, 0]) {
+                                    cube([2.01, 2.0, 8]);
+                                    translate([-1.2, 0, 0]) rotate([0, 12, 0]) cube([2.01, 2.0, 8]);
+                                }
                             // center
-                            translate([5.4, 9.6 + (side - 1)*.65, block.z - topThickness - 2.2])
-                                cube([1.61, 2.5, 3]);
+                            translate([4.8, 9.6 + (side - 1)*.65, block.z - topThickness - 2.2])
+                                cube([2.01, 2.2, 3]);
                             // bottom switch
                             rotate([0, 90, 0]) {
                                 // center hole
@@ -465,8 +477,11 @@ module thumb(side) {
                                     rotate([0, 0, -135])
                                     cube([13, 1.5, 1.5]);
                                 // main channel
-                                translate([-37, 4.45, 5.26])
-                                    cube([16, 2.5, 2.0]);
+                                translate([-33.4, 4.45, 5.26])
+                                    cube([11.5, 2.5, 2.0]);
+                                translate([-38, 1.3, 5.26])
+                                    rotate([0, 0, 30])
+                                    cube([7, 2.5, 2.0]);
                             }
                         }
 
@@ -512,9 +527,9 @@ module leg(side){
                 // Hinge
                 translate([.55, block.y - 15.9, block.z - topThickness - hingeDia/2 - 2*raiseThumbBlock]){
                     rotate([-90, 0, 0]) rotate([0, 90, 0]){
-                        // translate([0, 0, 2.2]) hinge(1.9);  // Gap is 2mm
-                        // translate([0, 0, 6.4]) hinge(1.9);  // Gap is 2mm
-                        translate([0, 0, 2.45]) hingeTEST(5.8, -1, -1);
+                        translate([0, 0, 2.15]) hingeTEST(2.0, -1, -1);
+                        translate([0, 0, 6.35]) hingeTEST(2.0, -1, -1);
+                        // translate([0, 0, 2.45]) hingeTEST(5.8, -1, -1);
                     }
                 }
 
@@ -670,8 +685,12 @@ module main(side) {
                                     cube([10, clipWidth + 2, 2]);
                         }
                         // ethernet jack
-                        translate([84 - PCBOrigin.x, PCBOrigin.y - 158.7 - (side - 1) / 2 * 7.5, block.z - 2.7])
-                            cube([15.5, 18, 2.8]);
+                        // translate([84 - PCBOrigin.x, PCBOrigin.y - 158.7 - (side - 1) / 2 * 7.5, block.z - 2.7])
+                        //     cube([15.5, 18, 2.8]);
+                        translate([87.5 - PCBOrigin.x, PCBOrigin.y - 149.7 - (side - 1) / 2 * 7.5, block.z - 1.3])
+                            cube([7, 18.5, 2.8], center=true);
+                        translate([97.0 - PCBOrigin.x, PCBOrigin.y - 149.7 - (side - 1) / 2 * 7.5, block.z - 1.3])
+                            cube([6, 11, 2.8], center=true);
                     }
 
                     // CUT ALL OTHER CURVES
@@ -807,35 +826,35 @@ module main(side) {
                         translate([4.3 + hingeDia, block.z - topThickness - hingeDia/2 - raiseThumbBlock, 0])
                             cylinder(d=hingeHoleDia, h=16 + .1, center=true);
 
-                    // GROOVES FOR WIRES: BASE
-                    if (side==1) {  // Right side FIXME
-                    rotate(switchAngle){
-                        translate([5.1, 1.5, block.z - topThickness - .01])
-                            cube([11, 2.5, 2.01]);
-                        translate([5.3, 8.2, block.z - topThickness - .01])
-                            cube([11, 2.5, 2.01]);
-                    }
+                    // GROOVES FOR WIRES: BASE FIXME
+                    if (side==1) {  // Right side
+                        rotate(switchAngle){
+                            translate([2.4, 1.5, block.z - topThickness - .01])
+                                cube([14.1, 2.5, 2.01]);
+                            translate([5.4, 8.2, block.z - topThickness - .01])
+                                cube([11.1, 2.5, 2.01]);
+                        }
+                        translate([0.3, 8.3, block.z - topThickness - .01])
+                            cube([2.5, 3.7, 2.01]);
                     } else {        // Left side
-                    rotate(switchAngle){
-                        // for top switch
-                        translate([6.5, 8.3, block.z - topThickness - .01])
-                            cube([10, 2.5, 2.01]);
-                        // for bottom switch
-                        translate([6.5, 1.8, block.z - topThickness - .01])
-                            cube([10, 2.5, 2.01]);
-                        translate([4.9, 5.4, block.z - topThickness - .01])
-                            rotate([0, 0, -45])
-                                cube([4, 2.5, 2.01]);
-                    }
+                        rotate(switchAngle){
+                            // for top switch
+                            translate([6.6, 8.3, block.z - topThickness - .01])
+                                cube([9.6, 2.5, 2.01]);
+                            // for bottom switch
+                            translate([4.4, 1.8, block.z - topThickness - .01])
+                                cube([12.1, 2.5, 2.01]);
+                            translate([6.5, 2.2, block.z - topThickness - .01])
+                                rotate([0, 0, 45])
+                                    cube([2.6, 3, 2.01]);
+                        }
+                        translate([0.3, 10.3, block.z - topThickness - .01])
+                            cube([2.5, 3.7, 2.01]);
+                        // #translate([0.3, 3.3, block.z - topThickness - .01])
+                        //     cube([2.5, 3.3, 2.01]);
                     }
 
                 }  // difference
-
-                // // ridges around clip hole to prevent warping
-                // translate([PCBOrigin.x+5 - 14, PCBOrigin.y - 111.9 - 3.5, block.z - 4.0])
-                //     cube([clipSlotLength + 9, 1.5, 3]);
-                // translate([PCBOrigin.x+5 - 14, PCBOrigin.y - 111.9 + clipWidth + 2, block.z - 4.0])
-                //     cube([clipSlotLength + 9, 1.5, 3]);
 
                 // bump for locking thumb folding leg in place (upright)
                 rotate(switchAngle)
@@ -912,14 +931,9 @@ module main(side) {
                                 // translate([0, 0,  -7.9]) hinge(2.9);
                                 // translate([0, 0,  -14.1]) hinge(2);
                                 translate([0, 0,  -1.7]) hingeTEST(2.7, 1.4, 0);
+                                translate([0, 0,  -6.9]) hingeTEST(2.5, 2.05, 1.7);
                                 difference(){
-                                translate([0, 0,  -6.97]) hingeTEST(2.5, 2.05, 1.7);
-                        translate([-4.7, -3, -7.0])
-                            rotate([45, 0, 0])
-                                cube([3, 4.5, 2.5]);
-                                }
-                                difference(){
-                                    translate([0, 0, -18.34]) hingeTEST(3.5, 0, 5.15);
+                                    translate([0, 0, -18.2]) hingeTEST(3.5, 0, 5.15);
                                     rotate([switchAngle.z, 0, 0])
                                         translate([-7, -18.88, -20]) cube([10, 10, 10]);
                                 }
@@ -934,11 +948,11 @@ module main(side) {
                 // Back leg
                 translate([11, block.y - 14, block.z - topThickness - hingeDia/2 - 2*raiseThumbBlock]){
                     rotate([0, 90, 180]){
-                        // translate([0, 1.9, -0.8]) hinge(2.8);
-                        // translate([0, 1.9, 4.2]) hinge(2);
-                        // translate([0, 1.9, 8.4]) hinge(2.6);
-                        translate([0, 1.9, -0.8]) hingeTEST(2.9, 0, 2.9);
-                        translate([0, 1.9, 8.1]) hingeTEST(2.9, 2.9, 0);
+                        translate([0, 1.9, -0.8]) hingeTEST(2.8, 0, .95);
+                        translate([0, 1.9, 4.2]) hingeTEST(2, .95, .95);
+                        translate([0, 1.9, 8.4]) hingeTEST(2.6, .95, 0);
+                        // translate([0, 1.9, -0.8]) hingeTEST(2.9, 0, 2.9);
+                        // translate([0, 1.9, 8.1]) hingeTEST(2.9, 2.9, 0);
                     }
                 }
 
@@ -1099,7 +1113,7 @@ module build() {
                     rotate([90, -90, 0])
                     rotate([0, 0, side * -switchAngle.z])
                     thumb("left");
-            else if (THUMB == "inplace") // FIXME
+            else if (THUMB == "inplace")
                 thumb("left");
             else if (THUMB == "folded")
                 // flip to folded position (approximate)
@@ -1161,14 +1175,14 @@ module hingeTEST(hingeThickness, x, y)
 //             if (coneL > 0) {
 //                 mirror([0, 0, 1])
 //                     cylinder(d1=hingeDia - 2*a - .1, d2=0, h=(coneL > maxConeHeight) ? maxConeHeight : coneL);
-//                 translate([0, 0, (coneL > maxConeHeight) ? -maxConeHeight : -coneL - hingeGap])
-//                     cylinder(r=c - .1, h=(coneL > maxConeHeight) ? maxConeHeight : coneL + hingeGap);  // adding hingeGap to ensure these connect from each side
+//                 translate([0, 0, (coneL > maxConeHeight) ? -maxConeHeight : -coneL - 1.5*hingeGap])
+//                     cylinder(r=c - .1, h=(coneL > maxConeHeight) ? maxConeHeight : coneL + 1.5*hingeGap);  // adding hingeGap to ensure these connect from each side
 //             }
 //             if (coneR > 0) {
-//                 translate([0, 0, hingeThickness])
+//                 translate([0, 0, hingeThickness]) {
 //                     cylinder(d1=hingeDia - 2*a - .1, d2=0, h=(coneR > maxConeHeight) ? maxConeHeight : coneR);
-//                 translate([0, 0, hingeThickness])
-//                     cylinder(r=c - .1, h=(coneR > maxConeHeight) ? maxConeHeight : coneR + hingeGap);  // adding hingeGap to ensure these connect from each side
+//                     cylinder(r=c - .1, h=(coneR > maxConeHeight) ? maxConeHeight : coneR + 1.5*hingeGap);  // adding hingeGap to ensure these connect from each side
+//                     }
 //             }
 //             translate([-hingeDia/2 - 1, -hingeDia/2, 0]) cube([hingeDia/2 + 1, hingeDia*2, hingeThickness]);
 //             // Add extra support to base
