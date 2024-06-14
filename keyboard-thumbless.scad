@@ -685,12 +685,12 @@ module main(side) {
                                     cube([10, clipWidth + 2, 2]);
                         }
                         // ethernet jack
-                        // translate([84 - PCBOrigin.x, PCBOrigin.y - 158.7 - (side - 1) / 2 * 7.5, block.z - 2.7])
-                        //     cube([15.5, 18, 2.8]);
-                        translate([87.5 - PCBOrigin.x, PCBOrigin.y - 149.7 - (side - 1) / 2 * 7.5, block.z - 1.3])
-                            cube([7, 18.5, 2.8], center=true);
+                        translate([88.0 - PCBOrigin.x, PCBOrigin.y - 143.8 - (side - 1) / 2 * 7.5, block.z - 1.3])
+                            cube([6, 5.75, 2.8], center=true);
+                        translate([88.0 - PCBOrigin.x, PCBOrigin.y - 155.6 - (side - 1) / 2 * 7.5, block.z - 1.3])
+                            cube([6, 5.75, 2.8], center=true);
                         translate([97.0 - PCBOrigin.x, PCBOrigin.y - 149.7 - (side - 1) / 2 * 7.5, block.z - 1.3])
-                            cube([6, 11, 2.8], center=true);
+                            cube([5, 11, 2.8], center=true);
                     }
 
                     // CUT ALL OTHER CURVES
@@ -848,10 +848,8 @@ module main(side) {
                                 rotate([0, 0, 45])
                                     cube([2.6, 3, 2.01]);
                         }
-                        translate([0.3, 10.3, block.z - topThickness - .01])
+                        translate([0.6, 10.5, block.z - topThickness - .01])
                             cube([2.5, 3.7, 2.01]);
-                        // #translate([0.3, 3.3, block.z - topThickness - .01])
-                        //     cube([2.5, 3.3, 2.01]);
                     }
 
                 }  // difference
