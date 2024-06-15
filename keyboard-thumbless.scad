@@ -357,7 +357,7 @@ module thumb(side) {
                             translate([2, 0, 0])
                                 rotate(switchAngle)
                                 translate([thumbBlockThickness - 1.81, 0, 5])
-                                cube([block.x/2, keyWidth+1, block.z - topThickness - 3]);
+                                cube([8, keyWidth+1, block.z - topThickness - 3]);
 
                             // CUT OUT ARCH BEHIND KEYS (EXTRUDING OVAL OF CORRECT SIZE)
                             if (FINAL) {
@@ -377,10 +377,9 @@ module thumb(side) {
                             //          cube([20, 20, 30]);
 
                             // CUT OUT RECTANGLE WITH KEYS
-                            translate([block.x/2,
-                                    (PCBOrigin.y - PCBTopEdge)/2 + keyWidth/2 - topThickness/2,
-                                    block.z/2 - topThickness])
-                                cube([block.x + 10, PCBOrigin.y - PCBTopEdge - keyWidth - topThickness, block.z + 1], center=true);
+                                    // (PCBOrigin.y - PCBTopEdge)/2 + keyWidth/2 - topThickness/2,
+                            translate([0, 26, 11.4])
+                                cube([15, 15, 30], center=true);
 
                             // SLICE ANGLE OFF BOTTOM OF FEET
                             translate([0, -.05, -10])
@@ -400,21 +399,12 @@ module thumb(side) {
                                 rotate([180, 0, 0])
                                     // Need to put hinges in different spots to avoid the switch wires
                                     if (side == 1){  // if right side
-                                        // translate([0, 0,  0]) hinge(2);
-                                        // translate([0, 0, 5.7]) hinge(2.9);
-                                        // translate([0, 0, 13.6]) hinge(2);
-                                        translate([0, 0,  14.9]) hingeTEST(2.8, -1, -1);
-                                        translate([0, 0,  7.8]) hingeTEST(2.9, -1, -1);
-                                        translate([0, 0,  0.6]) hingeTEST(4.5, -1, -1);
+                                        translate([0, 0,  15.9]) hingeTEST(3.05, -1, -1);
+                                        translate([0, 0,  7.8]) hingeTEST(3.9, -1, -1);
+                                        translate([0, 0,  0.4]) hingeTEST(4.7, -1, -1);
                                     } else {         // if left side
-                                        // translate([0, 0,  2.1]) hinge(2.8);
-                                        // translate([0, 0, 10.0]) hinge(2);
-                                        // translate([0, 0, 15.7]) hinge(2);
-                                        translate([0, 0, 1.8]) hingeTEST(2.5, -1, -1);
-                                        translate([0, 0,  7.0]) hingeTEST(7.6, -1, -1);
-                                        // translate([0, 0,  2.1]) hingeTEST(2.8, -1, -1);
-                                        // translate([0, 0, 8.0]) hingeTEST(3.2, -1, -1);
-                                        // translate([0, 0, 13.6]) hingeTEST(4.1, -1, 0);
+                                        translate([0, 0, .4]) hingeTEST(3.9, -1, -1);
+                                        translate([0, 0,  7.0]) hingeTEST(8.1, -1, -1);
                                     }
                             }
                         }
@@ -441,13 +431,13 @@ module thumb(side) {
                                     cube([2, 2.5, 2.0]);
                                 translate([-17.3, 1.7, 5.26])
                                     rotate([0, 0, 45])
-                                    cube([3.5, 2, 2.0]);
+                                    cube([3.5, 1.3, 2.0]);
                                 // center hole
                                 translate([-18.6, 8.3, 5.26])
                                     cube([2, 2.5, 2.0]);
                                 translate([-24, 1.8, 5.26])
                                     rotate([0, 0, 45])
-                                    cube([10, 2, 2.0]);
+                                    cube([10, 1.3, 2.0]);
                                 // main channel
                                 translate([-37.2, 1.5, 5.26])
                                     cube([20, 2.5, 2.0]);
@@ -465,17 +455,17 @@ module thumb(side) {
                             // bottom switch
                             rotate([0, 90, 0]) {
                                 // center hole
-                                translate([-19, 8.7, 5.76])
-                                    cube([2, 1.5, 1.5]);
-                                translate([-22, 4.7, 5.76])
+                                translate([-18, 8.3, 5.26])
+                                    cube([2, 2.5, 2.0]);
+                                translate([-22.2, 4.5, 5.26])
                                     rotate([0, 0, 45])
-                                    cube([6, 1.5, 1.5]);
+                                    cube([7.5, 1.3, 2.0]);
                                 // outer hole
-                                translate([-18, 13.9, 5.76])
-                                    cube([4, 1.5, 1.5]);
-                                translate([-18, 15.3, 5.76])
+                                translate([-18, 13.3, 5.26])
+                                    cube([4, 2.5, 2.0]);
+                                translate([-18, 14.9, 5.26])
                                     rotate([0, 0, -135])
-                                    cube([13, 1.5, 1.5]);
+                                    cube([13, 1.3, 2.0]);
                                 // main channel
                                 translate([-33.4, 4.45, 5.26])
                                     cube([11.5, 2.5, 2.0]);
@@ -538,13 +528,6 @@ module leg(side){
             // Slice off edge of bumper cylinder
             translate([11.65, 76.16 - 5, 0])
                 cube([1, 10, 10]);
-
-            // // bump for locking folding leg in place
-            // translate([-1.64 - lockBumpSize,
-            //         77.15 + .55,
-            //         block.z - topThickness - 8])
-            //     rotate([0, 90, 0])
-            //     cylinder(r=lockBumpRadius, h=20 + lockBumpSize + .1);
 
             // bump for locking folding leg in place
             translate([11.64 - lockBumpSize,
@@ -656,7 +639,7 @@ module main(side) {
                     if (FINAL) {
                         // Cut out main hole for terminal block. Adjust the position depending on which side
                         translate([108.16 - PCBOrigin.x - side * 1.25, PCBOrigin.y - 140.71, block.z - 1])
-                            cube([8, 12, 18], center=true);
+                            cube([8, 12, 14], center=true);
                         // Cut a "ramp" to make it easier to insert wires into terminal block hole
                         translate([102.81 - PCBOrigin.x - side * 1.25, PCBOrigin.y - 140.71, block.z - 3.8])
                             rotate([0, -20, 0])
@@ -919,25 +902,14 @@ module main(side) {
                         rotate([0, 0, -90]){
                             // Need to put hinges in different spots to avoid the switch wires
                             if (side == 1) { // if right side
-                                // translate([0, 0, -13.5]) hinge(2.5);
-                                // translate([0, 0, -4.1]) hinge(2);
-                                translate([0, 0, -14.8]) hingeTEST(4.0, 0, 5.15);
+                                translate([0, 0, -15.8]) hingeTEST(4.0, 0, 5.15);
                                 translate([0, 0, -7.7]) hingeTEST(2.5, 0, 5.15);
-                                translate([0, 0, -0.5]) hingeTEST(1.5, 0, 5.15);
+                                translate([0, 0, -0.3]) hingeTEST(1.0, 0, 5.15);
                             } else { // if left side
-                                // translate([0, 0,  -2.0]) hinge(3);
-                                // translate([0, 0,  -7.9]) hinge(2.9);
-                                // translate([0, 0,  -14.1]) hinge(2);
-                                translate([0, 0,  -1.7]) hingeTEST(2.7, 1.4, 0);
+                                translate([0, 0,  -0.3]) hingeTEST(1.0, 1.4, 0);
                                 translate([0, 0,  -6.9]) hingeTEST(2.5, 2.05, 1.7);
-                                difference(){
-                                    translate([0, 0, -18.2]) hingeTEST(3.5, 0, 5.15);
-                                    rotate([switchAngle.z, 0, 0])
-                                        translate([-7, -18.88, -20]) cube([10, 10, 10]);
-                                }
-                                // translate([0, 0,  -2.0]) hingeTEST(3, 1.4, 0);
-                                // translate([0, 0,  -7.9]) hingeTEST(2.9, 1.6, 1.4);
-                                // translate([0, 0,  -13.5]) hingeTEST(2.2, 2.05, 1.7);
+                                translate([0, 0, -19.0]) hingeTEST(3.8, 0, 5.15);
+                                translate([-6.95, -2.75, -19.0]) cube([4, 2, 3.8]);
                             }
                         }
                     }
@@ -949,8 +921,6 @@ module main(side) {
                         translate([0, 1.9, -0.8]) hingeTEST(2.8, 0, .95);
                         translate([0, 1.9, 4.2]) hingeTEST(2, .95, .95);
                         translate([0, 1.9, 8.4]) hingeTEST(2.6, .95, 0);
-                        // translate([0, 1.9, -0.8]) hingeTEST(2.9, 0, 2.9);
-                        // translate([0, 1.9, 8.1]) hingeTEST(2.9, 2.9, 0);
                     }
                 }
 
