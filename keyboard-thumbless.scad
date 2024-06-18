@@ -1,4 +1,4 @@
-$fn= $preview ? 32 : 128; // render more accurately than preview
+$fn= $preview ? 32 : 128;        // render more accurately than preview
 segments = $preview ? 32 : 512;  // render some curves more accurately still
 
 // VARIABLES DEFINING WHAT TO BUILD (and where)
@@ -34,22 +34,25 @@ nutDiameter = 5.08;       // diameter of nut, point to point (actually 5.0mm)
 standoffDiameter = 3.2;   // diameter of standoff
 standoffHeight = 10;      // height needed for MCU under stand
 
-hingeGap = .1;  // gap between hinges
+hingeGap = .1;            // gap between hinges
 hingeDia = 5.5;
-hingeHoleDia = 1.7277;  // = 14 gauge (use copper wire): 1.6277mm
+hingeHoleDia = 1.7277;    // = 14 gauge (use copper wire): 1.6277mm
 
 bumperDia = 12.1;         // Diameter of bumpers + 2.1mm
 
 keyboardLength = 106;     // length of keyboard to front surface of thumb
+legLengthFudge = 1.5;     // extra length added to back leg (to compensate for warped print)
+raiseThumbBlock = .2;     // Amount thumb block gets raised by hinge
+thumbBlockThickness = 7;  // thickness of thumb block
 
 stringHoleRadius = 2;     // radius of hole for string
 stringHoleThickness = topThickness;  // thickness of string holder
-stringHolderLength = 3;  // length of string holder attached to top
+stringHolderLength = 3;   // length of string holder attached to top
 
 archAngle = 15;           // angle of rotation of arch under keys
 archFudge = 12;           // amount to move arch left
 
-niceNanoSize = [18.5, 36];  // dimensions of nice!nano cutout; nicenano: 18 mm wide by 34 long
+niceNanoSize = [18.5, 36];   // dimensions of nice!nano cutout; nicenano: 18 mm wide by 34 long
 MCUCoverTopThickness = 1.5;  // thickness of top cover for MCU cover
 MCUCoverWallThickness = 1 + (standoffDiameter + screwHeadDiameter) / 2;
 MCUCoverSize = [niceNanoSize.x + MCUCoverWallThickness * 2,  // dimensions of MCU cover
@@ -72,15 +75,15 @@ clipSlotGap = 0.5;         // gap between slot and string hole
 clipTipAngle = 9;          // angle of opening of slot
 clipTipLength = 3.5;       // length of (angled) tip
 clipRidgeHeight = 0.5;     // height of ridge above and below
-clipWidth = stringHoleRadius * 4;           // width of clip
-clipRidgeWidth = clipWidth/3;                   // width of ridge on top and bottom
+clipWidth = stringHoleRadius * 4;  // width of clip
+clipRidgeWidth = clipWidth/3;      // width of ridge on top and bottom
 
 // PCB Coordinates
-PCBTopPoint = 72.07;      // Top y-coord on PCB
-PCBBottomPoint = 159.79;  // Bottom y-coord on PCB  8.51
-PCBTopEdge = 78.63;       // y-coord of top edge of PCB
-PCBLeftPoint = 81.0;      // x-coord of left-most point on PCB
-PCBRightPoint = 181.0;    // x-coord of right-most point on PCB
+PCBTopPoint = 72.07;       // Top y-coord on PCB
+PCBBottomPoint = 159.79;   // Bottom y-coord on PCB
+PCBTopEdge = 78.63;        // y-coord of top edge of PCB
+PCBLeftPoint = 81.0;       // x-coord of left-most point on PCB
+PCBRightPoint = 181.0;     // x-coord of right-most point on PCB
 
 // PCB bottom left corner coordinate
 // Note: in KiCad, y-coordinates are reversed from in OpenSCAD
@@ -323,10 +326,7 @@ module hinge(hingeThickness) {
     }
 }
 
-raiseThumbBlock = .2;  // Amount thumb block gets raised by hinge
-
 module thumb(side) {
-    thumbBlockThickness = 7;
     side = side == "left" ? -1 : 1;
 
         // flip the board if on the left side
@@ -335,10 +335,24 @@ module thumb(side) {
                 difference() {
                     union() {
                         difference() {
-                            // ADD ROTATED THUMB BLOCK
-                            translate([0, 0, -3 - topThickness])
-                                rotate(switchAngle)
-                                cube([11.8, keyWidth-.06, block.z + 3 + raiseThumbBlock]);
+                            union() {
+                                // ADD ROTATED THUMB BLOCK
+                                translate([0, 0, -3 - topThickness])
+                                    rotate(switchAngle)
+                                    cube([7, keyWidth-.06, block.z + 3 + raiseThumbBlock]);
+
+                                // BUMPERS
+                                // Cylinder for bumper
+                                rotate([0, -sliceAngle, 0])
+                                    translate([1.0, 12.6, .844])
+                                            cylinder(d=bumperDia, h=stringHoleThickness);
+
+                            }
+
+                            // CUT OUT BUMPER RECESS
+                            rotate([0, -sliceAngle, 0])
+                                translate([1.0, 12.6, .69])
+                                        cylinder(d=bumperDia-2, h=2, center=true);
 
                             // TOP KEY HOLE
                             translate([-.05, 0, 0])
@@ -352,44 +366,23 @@ module thumb(side) {
                                 translate([0, keyWidth/2, keyFromBottom + keyHeight/2])
                                 keyhole(side);
 
-                            // EXCESS BEHIND KEY HOLE
-                            // Undercut the bumper
-                            translate([2, 0, 0])
-                                rotate(switchAngle)
-                                translate([thumbBlockThickness - 1.81, 0, 5])
-                                cube([8, keyWidth+1, block.z - topThickness - 3]);
+                            // EXCESS BUMPER ON FRONT FACE
+                            rotate(switchAngle)
+                                translate([-2, 7, -1])
+                                cube([2, 10, 5]);
 
-                            // CUT OUT ARCH BEHIND KEYS (EXTRUDING OVAL OF CORRECT SIZE)
-                            if (FINAL) {
-                                translate([block.x + archFudge,
-                                        block.y/2,
-                                        -1.5 + raiseThumbBlock]) // make sure to leave minimum thickness
-                                    rotate([90+archAngle, 90, 0]) // archAngle
-                                    linear_extrude(height=2*block.y, center=true)
-                                    resize([2*block.z, 2*(block.x - keyMinDepth)])
-                                    circle($fn=segments);
-                                }
-
-                            //  rotate([0, 21, -16])
-                            //      translate([1.2,
-                            //                 0,
-                            //                 0]) // make sure to leave minimum thickness
-                            //          cube([20, 20, 30]);
-
-                            // CUT OUT RECTANGLE WITH KEYS
-                                    // (PCBOrigin.y - PCBTopEdge)/2 + keyWidth/2 - topThickness/2,
+                            // SLICE OFF ANGLE ON SIDES
                             translate([0, 26, 11.4])
                                 cube([15, 15, 30], center=true);
+                            rotate([0, 21, -16])
+                                translate([0.8, 0, 0]) // make sure to leave minimum thickness
+                                cube([10, 8.7, 13]);
 
                             // SLICE ANGLE OFF BOTTOM OF FEET
                             translate([0, -.05, -10])
                                 rotate([0, -sliceAngle, 0])
-                                translate([-10, 0, raiseThumbBlock - 10])
-                                cube([block.x*2 + .1, block.y + .1, 20], center=false);
-
-                            // Bumper
-                            rotate([0, -sliceAngle, 0]) translate([bumperDia/2-5, bumperDia/2+6.5, .69])
-                                cylinder(d=bumperDia-2, h=2, center=true);
+                                translate([-10, -2, raiseThumbBlock])
+                                cube([20, 25, 10], center=false);
 
                         } // difference
 
@@ -414,7 +407,7 @@ module thumb(side) {
                     // GROOVES FOR WIRES: THUMB FIXME
                     rotate(switchAngle)
                         if (side == 1) {                                // RIGHT SIDE
-                            // top switch
+                                                                        // top switch
                             translate([4.8, 3.7, block.z - topThickness - 3.5])
                                 rotate([-45, 0, 0]) {
                                     cube([2.01, 2.0, 8]);
@@ -443,7 +436,7 @@ module thumb(side) {
                                     cube([20, 2.5, 2.0]);
                             }
                         } else {                                        // LEFT SIDE
-                            // top switch
+                                                                        // top switch
                             translate([4.8, 14.0, block.z - topThickness - 4.3])
                                 rotate([45, 0, 0]) {
                                     cube([2.01, 2.0, 8]);
@@ -465,13 +458,13 @@ module thumb(side) {
                                     cube([4, 2.5, 2.0]);
                                 translate([-18, 14.9, 5.26])
                                     rotate([0, 0, -135])
-                                    cube([13, 1.3, 2.0]);
+                                    cube([12.5, 1.3, 2.0]);
                                 // main channel
-                                translate([-33.4, 4.45, 5.26])
-                                    cube([11.5, 2.5, 2.0]);
-                                translate([-38, 1.3, 5.26])
+                                translate([-33.9, 4.9, 4.42])
+                                    cube([12.1, 1.3, 2.6]);
+                                translate([-38, 1.8, 4.42])
                                     rotate([0, 0, 30])
-                                    cube([7, 2.5, 2.0]);
+                                    cube([5.78, 1.8, 2.6]);
                             }
                         }
 
@@ -500,13 +493,14 @@ module leg(side){
 
         difference(){
             union(){
-                translate([0, 75.16, -raiseThumbBlock])
-                    cube([11.64, topThickness + 2, block.z - topThickness + raiseThumbBlock]);
+                translate([0, 75.16, -raiseThumbBlock - legLengthFudge])
+                    cube([11.64, topThickness + 2, block.z - topThickness + raiseThumbBlock + legLengthFudge]);
 
                 // BUMPERS
                 // Cylinder for bumper
+                translate([0, 0, -legLengthFudge])
                 rotate([0, -sliceAngle, 0]){
-                    translate([bumperDia/2 + 1, PCBTopEdge-3.5, 0.643])
+                    translate([bumperDia/2 + 1, PCBTopEdge-3.52, 0.69])
                         cylinder(d=bumperDia, h=stringHoleThickness);
                     // Fill in around bumper
                     translate([1.12, 74, .643])
@@ -526,7 +520,7 @@ module leg(side){
             }
 
             // Slice off edge of bumper cylinder
-            translate([11.65, 76.16 - 5, 0])
+            translate([11.65, 76.16 - 5, -legLengthFudge])
                 cube([1, 10, 10]);
 
             // bump for locking folding leg in place
@@ -538,22 +532,26 @@ module leg(side){
 
             // Round corner
             difference() {
-                translate([2.5, PCBOrigin.y - PCBTopEdge - 2.49, block.z/2])
-                    cube([5.01, 5.01, block.z+1], center=true);
-                translate([5, PCBOrigin.y - PCBTopEdge - 5, block.z/2])
+                translate([2.5, PCBOrigin.y - PCBTopEdge - 2.49, (block.z - legLengthFudge)/2])
+                    cube([5.01, 5.01, block.z + legLengthFudge + 1], center=true);
+                translate([5, PCBOrigin.y - PCBTopEdge - 5, (block.z - legLengthFudge)/2])
                     rotate([0, 0, 90])
-                    cylinder(h=block.z+2, r=5, center=true);
+                    cylinder(h=block.z + legLengthFudge + 2, r=5, center=true);
             }
 
             // Hollow out spot for bumper inside cylinder
-            rotate([0, -sliceAngle, 0]) translate([bumperDia/2 + 1, PCBTopEdge-3.5, 0.69]) cylinder(d=bumperDia-2, h=2, center=true);
+            translate([0, 0, -legLengthFudge])
+                rotate([0, -sliceAngle, 0])
+                    translate([bumperDia/2 + 1, PCBTopEdge-3.52, 0.69])
+                        cylinder(d=bumperDia-2, h=2, center=true);
             // Slice off front edge
-            translate([-bumperDia, PCBTopEdge-bumperDia/2-3, -bumperDia/2])
+            translate([-bumperDia, PCBTopEdge-bumperDia/2-3, -(bumperDia + legLengthFudge)/2])
                 cube([bumperDia, bumperDia, 2*bumperDia]);
             // Slice off bottom (of sphere)
-            rotate([0, -sliceAngle, 0])
-                translate([-1, PCBTopEdge-bumperDia+1.5, -bumperDia+0.65])
-                cube([bumperDia + 3, bumperDia + 3, bumperDia]);
+            translate([0, PCBTopEdge - bumperDia + 1.5, -bumperDia - legLengthFudge])
+                rotate([0, -sliceAngle, 0])
+                    translate([3, 0, 0])
+                        cube([bumperDia + 3, bumperDia + 3, bumperDia]);
 
             // Cut off corner to avoid lock bump when folded
             translate([11.65 - 1.3, 74.16 - .5, 37])
@@ -1011,7 +1009,6 @@ module build() {
 
     // RIGHT SIDE
     if (RIGHT) {
-        side = 1;
 
         // MAIN STAND
         if (MAIN)
@@ -1022,37 +1019,37 @@ module build() {
             // put on baseplate for printing
             rotate([90, -90, 0])
                 translate([27.45, 1.5, -36.5])
-                rotate([0, 0, side * -switchAngle.z])
+                rotate([0, 0, -switchAngle.z])
                 thumb("right");
         else if (THUMB == "inplace")
             thumb("right");
         else if (THUMB == "folded")
             // flip to folded position (approximate)
-            rotate([0, -90, side * switchAngle.z])
+            rotate([0, -90, switchAngle.z])
                 translate([23.25, 0, -42.9])
-                rotate([0, 0, side * -switchAngle.z])
+                rotate([0, 0, -switchAngle.z])
                 thumb("right");
 
         // BACK LEG
         if (LEG == "print")
             // put on baseplate for printing
-            translate([-22, 0, -block.z - 1.16])
+            translate([-22, legLengthFudge, -block.z - 1.16])
                 rotate([0, 90, 0])
-                rotate([0, 0, side * 90])
+                rotate([0, 0, 90])
                 rotate([0, 90, 0])
                 leg("right");
         else if (LEG == "inplace")
             leg("right");
         else if (LEG == "folded")
             // flip to folded position (approximate)
-            rotate([side * -90, 0, 0])
+            rotate([-90, 0, 0])
                 translate([0, -104.67, 38.98])
                 leg("right");
 
         // MCU COVER
         if (MCU == "print") {
             // put on baseplate for printing
-            translate([-41, 86, 0]) {
+            translate([-41, 85.5 + legLengthFudge, 0]) {
                 rotate([0, 0, 180]) {
                     MCUCover();
                 }
@@ -1069,7 +1066,6 @@ module build() {
 
     // LEFT SIDE
     if (LEFT) {
-        side = -1;
 
         translate([0,-1,0]) {
             if (MAIN)
@@ -1077,32 +1073,32 @@ module build() {
 
             if (THUMB == "print")
                 // put on baseplate for printing
-                translate([side * 9.5 - 11, (1 + side) * 19.5 - 3, block.z - 12.55])
+                translate([-21.1, -3, block.z - 12.55])
                     rotate([90, -90, 0])
-                    rotate([0, 0, side * -switchAngle.z])
+                    rotate([0, 0, switchAngle.z])
                     thumb("left");
             else if (THUMB == "inplace")
                 thumb("left");
             else if (THUMB == "folded")
                 // flip to folded position (approximate)
-                rotate([0, -90, side * switchAngle.z])
+                rotate([0, -90, -switchAngle.z])
                     translate([23.25, 0, -42.9])
-                    rotate([0, 0, side * -switchAngle.z])
+                    rotate([0, 0, switchAngle.z])
                     thumb("left");
 
             if (LEG == "print")
                 // put on baseplate for printing
-                translate([-22, 0, -block.z - 1.16])
+                translate([-22, -legLengthFudge, -block.z - 1.16])
                     rotate([0, 90, 0])
-                    rotate([0, 0, side * 90])
+                    rotate([0, 0, -90])
                     rotate([0, 90, 0])
                     leg("left");
             else if (LEG == "inplace")
                 leg("left");
             else if (LEG == "folded")
                 // flip to folded position (approximate)
-                // translate([0, side * 39.0, 104.60])
-                    rotate([side * -90, 0, 0])
+                // translate([0, -39.0, 104.60])
+                    rotate([90, 0, 0])
                     translate([0, 104.67, 38.98])
                     leg("left");
 
@@ -1112,7 +1108,8 @@ module build() {
 
     // STRING CLIP
     if (CLIP)
-        clip(2);
+        translate([0, -legLengthFudge, 0])
+            clip(2);
 
     // // END SLICE OFF CHUNK OF MODEL
     // }
